@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy vs. Rent Calculator</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Chart.js for the graph -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom styles for the toggle switch */
+        .toggle-checkbox:checked {
+            @apply: bg-blue-600;
+            right: 0;
+            border-color: #3b82f6;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            @apply: bg-blue-600;
+        }
+        .toggle-checkbox:checked + .toggle-label::after {
+            @apply: translate-x-full;
+        }
+        /* Ensure inputs are visible in dark mode */
+        input[type="number"], input[type="radio"] {
+            @apply text-white;
+        }
+        input[type="radio"]:checked {
+            @apply bg-blue-500;
+        }
+    </style>
+    <script>
+        // Set up Tailwind dark mode
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-gray-900 text-gray-200 font-sans antialiased p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-3xl font-bold text-center text-white mb-8">Buy vs. Rent Calculator</h1>
+
+        <!-- Top Controls: Mode Switch and Analysis Period -->
+        <div class="bg-gray-800 p-6 rounded-xl shadow-lg mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                
+                <!-- Mode Switch -->
+                <div>
+                    <label for="mode-switch" class="text-lg font-semibold text-white">Calculator Mode</label>
+                    <div class="flex items-center space-x-4 mt-2">
+                        <span id="label-norwegian" class="text-blue-400 font-medium">Norwegian Market</span>
+                        <div class="relative inline-block w-14 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" name="mode-switch" id="mode-switch" class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-gray-700 border-4 border-gray-700 appearance-none cursor-pointer top-0.5 left-0.5 transition-transform duration-200 ease-in-out"/>
+                            <label for="mode-switch" class="toggle-label block overflow-hidden h-8 rounded-full bg-gray-600 cursor-pointer"></label>
+                        </div>
+                        <span id="label-international" class="text-gray-400 font-medium">International Market</span>
+                    </div>
+                </div>
+
+                <!-- Analysis Period -->
+                <div>
+                    <label for="analysis-period" class="block text-lg font-semibold text-white">Analysis Period (Years)</label>
+                    <input type="number" id="analysis-period" value="10" class="w-full mt-2 bg-gray-700 border border-gray-600 rounded-md p-3 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Sections Container -->
+        <div>
+            <!-- === NORWEGIAN MARKET INPUTS === -->
+            <div id="norwegian-version">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    
+                    <!-- Purchase Inputs (Norway) -->
+                    <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-4">
+                        <h2 class="text-2xl font-semibold text-white border-b border-gray-700 pb-3">Purchase Inputs (Norway)</h2>
+                        
+                        <div>
+                            <label for="int-home-price" class="block text-sm font-medium text-gray-300">Home Initial Price</label>
+                            <input type="number" id="int-home-price" value="500000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                        </div>
+
+                        <div>
+                            <label for="int-initial-costs-pct" class="block text-sm font-medium text-gray-300">Initial Costs (% of Home Price)</label>
+                            <input type="number" id="int-initial-costs-pct" value="5" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                        </div>
+                        
+                        <div>
+                            <label for="int-initial-costs-abs" class="block text-sm font-medium text-gray-300">(Additional) Initial Costs (Absolute)</label>
+                            <input type="number" id="int-initial-costs-abs" value="2000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                        </div>
+
+                        <div>
+                            <label for="int-fixed-term-abs" class="block text-sm font-medium text-gray-300">Annual Expenses w/ Fixed Term (Absolute)</label>
+                            <input type="number" id="int-fixed-term-abs" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                        </div>
+
+                        <div>
+                            <label for="int-fixed-term-years" class="block text-sm font-medium text-gray-300">Years for Fixed Term Expenses</label>
+                            <input type="number" id="int-fixed-term-years" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                        </div>
+
+                        <div>
+                            <label for="int-other-annual-abs" class="block text-sm font-medium text-gray-300">Other Annual Expenses (Absolute)</label>
+                            <input type="number" id="int-other-annual-abs" value="1500" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                        </div>
+
+                        <div>
+                            <label for="int-other-annual-pct" class="block text-sm font-medium text-gray-300">Other Annual Expenses (% of Home Value)</label>
+                            <input type="number" id="int-other-annual-pct" value="1.0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                        </div>
+
+                        <div>
+                            <label for="int-home-appreciation" class="block text-sm font-medium text-gray-300">Home Yearly Appreciation (%)</label>
+                            <input type="number" id="int-home-appreciation" value="3.0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                        </div>
+                        
+                        <div>
+                            <label for="int-inflation" class="block text-sm font-medium text-gray-300">Yearly Inflation (%)</label>
+                            <input type="number" id="int-inflation" value="2.0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                        </div>
+
+                        <div>
+                            <label for="int-end-term-abs" class="block text-sm font-medium text-gray-300">Expenses at End of Term (Absolute)</label>
+                            <input type="number" id="int-end-term-abs" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                        </div>
+
+                        <div>
+                            <label for="int-home-appreciation" class="block text-sm font-medium text-gray-300">Home Appreciation (%/year)</label>
+                            <input type="number" id="int-home-appreciation" value="3.0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                        </div>
+                        
+                        <div>
+                            <label for="int-selling-costs-pct" class="block text-sm font-medium text-gray-300">Selling Costs (% of Final Price)</label>
+                            <input type="number" id="int-selling-costs-pct" value="5.0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                        </div>
+                    </div>
+
+                    <!-- Rental Inputs (International) -->
+                    <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-4">
+                        <h2 class="text-2xl font-semibold text-white border-b border-gray-700 pb-3">Rental Inputs</h2>
+                        
+                        <div>
+                            <label for="int-annual-rent" class="block text-sm font-medium text-gray-300">Annual Rent (Absolute)</label>
+                            <input type="number" id="int-annual-rent" value="20000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                        </div>
+
+                        <div>
+                            <label for="int-rent-increase" class="block text-sm font-medium text-gray-300">Rent Increase (%/year)</label>
+                            <input type="number" id="int-rent-increase" value="2.0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                        </div>
+                    </div>
+
+                    <!-- Investment Inputs (International) -->
+                    <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-4">
+                        <h2 class="text-2xl font-semibold text-white border-b border-gray-700 pb-3">Investment Inputs</h2>
+                        
+                        <div>
+                            <label for="int-investment-return" class="block text-sm font-medium text-gray-300">Investment Return (%/year)</label>
+                            <input type="number" id="int-investment-return" value="6.0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                        </div>
+
+                        <div>
+                            <label for="int-cap-gains-tax" class="block text-sm font-medium text-gray-300">Capital Gains Tax (%)</label>
+                            <input type="number" id="int-cap-gains-tax" value="15.0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Calculate Button -->
+        <div class="text-center mt-8">
+            <button id="calculate-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300 shadow-lg">
+                Calculate
+            </button>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-section" class="mt-10 bg-gray-800 p-6 rounded-xl shadow-lg hidden">
+            <h2 class="text-2xl font-semibold text-white mb-6 text-center">Results after <span id="results-years">10</span> Years</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center mb-8">
+                <div>
+                    <div class="text-sm text-gray-400">Owner's Net Worth</div>
+                    <div id="owner-net-worth" class="text-3xl font-bold text-cyan-400"></div>
+                </div>
+                <div>
+                    <div class="text-sm text-gray-400">Renter's Net Worth</div>
+                    <div id="renter-net-worth" class="text-3xl font-bold text-lime-400"></div>
+                </div>
+                <div>
+                    <div class="text-sm text-gray-400">Net Benefit of <span id="winner"></span></div>
+                    <div id="net-benefit" class="text-3xl font-bold text-white"></div>
+                </div>
+            </div>
+
+            <!-- Chart -->
+            <div>
+                <canvas id="comparison-chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DOM Element References ---
+        const modeSwitch = document.getElementById('mode-switch');
+        const norwegianVersion = document.getElementById('norwegian-version');
+        const internationalVersion = document.getElementById('international-version');
+        const calculateBtn = document.getElementById('calculate-btn');
+        const resultsSection = document.getElementById('results-section');
+        const chartCanvas = document.getElementById('comparison-chart');
+        
+        const labelNorwegian = document.getElementById('label-norwegian');
+        const labelInternational = document.getElementById('label-international');
+        
+        const resultsYears = document.getElementById('results-years');
+        const ownerNetWorthEl = document.getElementById('owner-net-worth');
+        const renterNetWorthEl = document.getElementById('renter-net-worth');
+        const winnerEl = document.getElementById('winner');
+        const netBenefitEl = document.getElementById('net-benefit');
+
+        let myChart; // To hold the chart instance
+
+        // --- Event Listeners ---
+        
+        // Mode Switch Logic
+        modeSwitch.addEventListener('change', () => {
+            if (modeSwitch.checked) {
+                // International Mode
+                norwegianVersion.classList.add('hidden');
+                internationalVersion.classList.remove('hidden');
+                labelInternational.classList.remove('text-gray-400');
+                labelInternational.classList.add('text-blue-400');
+                labelNorwegian.classList.add('text-gray-400');
+                labelNorwegian.classList.remove('text-blue-400');
+            } else {
+                // Norwegian Mode
+                norwegianVersion.classList.remove('hidden');
+                internationalVersion.classList.add('hidden');
+                labelInternational.classList.add('text-gray-400');
+                labelInternational.classList.remove('text-blue-400');
+                labelNorwegian.classList.remove('text-gray-400');
+                labelNorwegian.classList.add('text-blue-400');
+            }
+            // Hide results when switching modes
+            resultsSection.classList.add('hidden');
+        });
+
+        // Calculate Button Logic
+        calculateBtn.addEventListener('click', () => {
+            let results;
+            const years = getVal('analysis-period');
+            
+            if (modeSwitch.checked) {
+                results = calculateInternational(years);
+            } else {
+                results = calculateNorwegian(years);
+            }
+
+            if (results) {
+                displayResults(results, years);
+            }
+        });
+
+        // --- Helper Functions ---
+
+        /**
+         * Gets the numerical value from an input field.
+         * @param {string} id - The ID of the input element.
+         * @returns {number} - The parsed float value, or 0 if empty/invalid.
+         */
+        function getVal(id) {
+            const el = document.getElementById(id);
+            if (!el) {
+                console.error('Element not found:', id);
+                return 0;
+            }
+            return parseFloat(el.value) || 0;
+        }
+
+        /**
+         * Formats a number as currency (using generic style for int'l)
+         * @param {number} value - The number to format.
+         * @returns {string} - Formatted currency string.
+         */
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'decimal',
+                maximumFractionDigits: 0,
+            }).format(value);
+        }
+
+        // --- Calculation Logic ---
+
+        /**
+         * Runs the simulation for the Norwegian Market.
+         * @param {number} years - The analysis period.
+         * @returns {object} - An object containing final values and history arrays.
+         */
+        function calculateNorwegian(years) {
+            // Get all input values
+            const homePrice = getVal('nor-home-price');
+            const downPayment = getVal('nor-down-payment');
+            const mortgageRate = getVal('nor-mortgage-rate') / 100;
+            const loanTerm = getVal('nor-loan-term');
+            const appreciation = getVal('nor-home-appreciation') / 100;
+            const regFee = getVal('nor-registration-fee');
+            const felleskostnader = getVal('nor-felleskostnader');
+            const maintenance = getVal('nor-maintenance');
+            const insurance = getVal('nor-home-insurance');
+            const propertyTaxPct = getVal('nor-property-tax') / 100;
+            const sellingCostsPct = getVal('nor-selling-costs') / 100;
+
+            let currentRent = getVal('nor-annual-rent');
+            const rentIncrease = getVal('nor-rent-increase') / 100;
+
+            const investmentRate = getVal('nor-investment-return') / 100;
+            const taxDeductionRate = getVal('nor-tax-deduction') / 100;
+            const capGainsTax = getVal('nor-cap-gains-tax') / 100;
+            
+            // --- Initial Calculations ---
+            
+            // 1. Owner's Initial Costs
+            const isSelveier = document.getElementById('nor-ownership-selveier').checked;
+            const docFee = isSelveier ? homePrice * 0.025 : 0;
+            const initialClosingCosts = docFee + regFee;
+            const initialOwnerCashOutlay = downPayment + initialClosingCosts;
+
+            // 2. Renter's Initial State
+            let renterInvestment = initialOwnerCashOutlay; // Renter invests the same initial cash
+
+            // 3. Loan Calculations
+            const loanAmount = homePrice - downPayment;
+            const monthlyRate = mortgageRate / 12;
+            const nPayments = loanTerm * 12;
+            const monthlyPayment = nPayments > 0 ? (loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, nPayments)) / (Math.pow(1 + monthlyRate, nPayments) - 1)) : 0;
+            const annualPayment = monthlyPayment * 12;
+
+            // --- Simulation ---
+            let ownerNetWorthHistory = [];
+            let renterNetWorthHistory = [];
+            let currentLoanBalance = loanAmount;
+            let currentHomeValue = homePrice;
+
+            // Year 0
+            ownerNetWorthHistory.push(homePrice - loanAmount); // Initial Equity
+            renterNetWorthHistory.push(renterInvestment);
+
+            for (let year = 1; year <= years; year++) {
+                // --- Owner Simulation ---
+                let interestPaid = 0;
+                let principalPaid = 0;
+
+                if (year <= loanTerm) {
+                    interestPaid = currentLoanBalance * mortgageRate;
+                    principalPaid = annualPayment - interestPaid;
+                    currentLoanBalance -= principalPaid;
+                }
+                
+                const taxSavings = interestPaid * taxDeductionRate;
+                const propertyTax = currentHomeValue * propertyTaxPct;
+                const totalOwnerCosts = (annualPayment + felleskostnader + maintenance + insurance + propertyTax) - taxSavings;
+                
+                currentHomeValue *= (1 + appreciation);
+                let ownerEquity = currentHomeValue - currentLoanBalance;
+                
+                // --- Renter Simulation ---
+                const renterCost = currentRent;
+                currentRent *= (1 + rentIncrease);
+                
+                // Renter invests the difference in annual costs
+                const annualSavings = totalOwnerCosts - renterCost;
+                renterInvestment += annualSavings;
+                renterInvestment *= (1 + investmentRate); // Investment grows
+                
+                // --- Store History ---
+                ownerNetWorthHistory.push(ownerEquity);
+                renterNetWorthHistory.push(renterInvestment);
+            }
+
+            // --- Final Calculations (End of Period) ---
+            
+            // 1. Owner sells
+            const sellingCosts = currentHomeValue * sellingCostsPct;
+            let finalOwnerNetWorth = (currentHomeValue - currentLoanBalance) - sellingCosts;
+            // Norway specific: Capital gains tax on primary residence is typically 0 after 1 year of ownership. We'll assume this.
+
+            // 2. Renter cashes out
+            let finalRenterNetWorth = renterInvestment;
+            const renterGains = finalRenterNetWorth - initialOwnerCashOutlay;
+            if (renterGains > 0) {
+                finalRenterNetWorth -= (renterGains * capGainsTax);
+            }
+
+            return {
+                owner: finalOwnerNetWorth,
+                renter: finalRenterNetWorth,
+                ownerHistory: ownerNetWorthHistory,
+                renterHistory: renterNetWorthHistory,
+            };
+        }
+
+        /**
+         * Runs the simulation for the International Market (simplified cash purchase model).
+         * @param {number} years - The analysis period.
+         * @returns {object} - An object containing final values and history arrays.
+         */
+        function calculateInternational(years) {
+            // Get all input values
+            const homePrice = getVal('int-home-price');
+            const initialCostsPct = getVal('int-initial-costs-pct') / 100;
+            const initialCostsAbs = getVal('int-initial-costs-abs');
+            const fixedTermAbs = getVal('int-fixed-term-abs');
+            const fixedTermYears = getVal('int-fixed-term-years');
+            const otherAnnualAbs = getVal('int-other-annual-abs');
+            const otherAnnualPct = getVal('int-other-annual-pct') / 100;
+            const endTermPct = getVal('int-end-term-pct') / 100;
+            const endTermAbs = getVal('int-end-term-abs');
+            const appreciation = getVal('int-home-appreciation') / 100;
+            const sellingCostsPct = getVal('int-selling-costs-pct') / 100;
+            const inflation = getVal('int-inflation') / 100; // NEW
+
+            let currentRent = getVal('int-annual-rent');
+            const rentIncrease = getVal('int-rent-increase') / 100;
+
+            const investmentRate = getVal('int-investment-return') / 100;
+            const capGainsTax = getVal('int-cap-gains-tax') / 100;
+
+            // --- Initial Calculations ---
+            // This model assumes a cash purchase as no loan is specified.
+            
+            // 1. Owner's Initial Costs
+            const initialClosingCosts = (homePrice * initialCostsPct) + initialCostsAbs;
+            const initialOwnerCashOutlay = homePrice + initialClosingCosts;
+
+            // 2. Renter's Initial State
+            let renterInvestment = initialOwnerCashOutlay; // Renter invests the full cash amount
+
+            // --- Simulation ---
+            let ownerNetWorthHistory = [];
+            let renterNetWorthHistory = [];
+            let currentHomeValue = homePrice;
+            let currentOtherAnnualAbs = otherAnnualAbs; // NEW: Track the inflating cost
+
+            // Year 0
+            ownerNetWorthHistory.push(currentHomeValue); // Owner's net worth is the home value
+            renterNetWorthHistory.push(renterInvestment);
+
+            for (let year = 1; year <= years; year++) {
+                // --- Owner Simulation ---
+                const annualFixed = (year <= fixedTermYears) ? fixedTermAbs : 0;
+                
+                // Use current home value for % cost, and inflating abs cost
+                const annualOther = currentOtherAnnualAbs + (currentHomeValue * otherAnnualPct);
+                const totalOwnerCosts = annualFixed + annualOther;
+                
+                // Appreciate home value for *next* year's calculation
+                currentHomeValue *= (1 + appreciation);
+                
+                // Inflate absolute cost for *next* year's calculation
+                currentOtherAnnualAbs *= (1 + inflation);
+
+                // --- Renter Simulation ---
+                const renterCost = currentRent;
+                // Inflate rent for *next* year's calculation
+                currentRent *= (1 + rentIncrease);
+                
+                // Renter invests the difference
+                const annualSavings = totalOwnerCosts - renterCost;
+                renterInvestment += annualSavings;
+                renterInvestment *= (1 + investmentRate);
+                
+                // --- Store History ---
+                ownerNetWorthHistory.push(currentHomeValue);
+                renterNetWorthHistory.push(renterInvestment);
+            }
+
+            // --- Final Calculations (End of Period) ---
+            
+            // 1. Owner sells
+            const sellingCosts = currentHomeValue * sellingCostsPct;
+            const endTermCosts = (currentHomeValue * endTermPct) + endTermAbs;
+            let finalOwnerNetWorth = currentHomeValue - sellingCosts - endTermCosts;
+
+            // Apply Capital Gains Tax (Owner)
+            const ownerGains = finalOwnerNetWorth - homePrice; // Simplified gain calculation
+            if (ownerGains > 0) {
+                finalOwnerNetWorth -= (ownerGains * capGainsTax);
+            }
+
+            // 2. Renter cashes out
+            let finalRenterNetWorth = renterInvestment;
+            const renterGains = finalRenterNetWorth - initialOwnerCashOutlay;
+            if (renterGains > 0) {
+                finalRenterNetWorth -= (renterGains * capGainsTax);
+            }
+            
+            return {
+                owner: finalOwnerNetWorth,
+                renter: finalRenterNetWorth,
+                ownerHistory: ownerNetWorthHistory,
+                renterHistory: renterNetWorthHistory,
+            };
+        }
+        
+        // --- Display Functions ---
+
+        /**
+         * Renders the results and the chart.
+         * @param {object} results - The results object from the calculation.
+         * @param {number} years - The analysis period.
+         */
+        function displayResults(results, years) {
+            resultsYears.textContent = years;
+            
+            const { owner, renter, ownerHistory, renterHistory } = results;
+
+            ownerNetWorthEl.textContent = formatCurrency(owner);
+            renterNetWorthEl.textContent = formatCurrency(renter);
+            
+            const benefit = Math.abs(owner - renter);
+            if (owner > renter) {
+                winnerEl.textContent = "Owning";
+                netBenefitEl.textContent = formatCurrency(benefit);
+                netBenefitEl.classList.add('text-cyan-400');
+                netBenefitEl.classList.remove('text-lime-400', 'text-white');
+            } else {
+                winnerEl.textContent = "Renting";
+                netBenefitEl.textContent = formatCurrency(benefit);
+                netBenefitEl.classList.add('text-lime-400');
+                netBenefitEl.classList.remove('text-cyan-400', 'text-white');
+            }
+
+            renderChart(ownerHistory, renterHistory, years);
+            resultsSection.classList.remove('hidden');
+        }
+
+        /**
+         * Renders the line chart using Chart.js.
+         */
+        function renderChart(ownerHistory, renterHistory, years) {
+            const ctx = chartCanvas.getContext('2d');
+            const labels = Array.from({ length: years + 1 }, (_, i) => `Year ${i}`);
+
+            if (myChart) {
+                myChart.destroy(); // Destroy previous chart instance
+            }
+
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Owner Net Worth',
+                            data: ownerHistory,
+                            borderColor: 'rgb(34, 211, 238)', // cyan-400
+                            backgroundColor: 'rgba(34, 211, 238, 0.1)',
+                            fill: true,
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Renter Net Worth',
+                            data: renterHistory,
+                            borderColor: 'rgb(163, 230, 53)', // lime-400
+                            backgroundColor: 'rgba(163, 230, 53, 0.1)',
+                            fill: true,
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                color: '#d1d5db', // gray-300
+                                callback: function(value) {
+                                    return formatCurrency(value);
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)' // White with alpha
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#d1d5db', // gray-300
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#d1d5db' // gray-300
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += formatCurrency(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Set explicit height for the canvas container
+            chartCanvas.parentElement.style.height = '400px';
+        }
+
+    </script>
+</body>
+</html>
