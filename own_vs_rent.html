@@ -75,6 +75,11 @@
                         </div>
 
                         <div>
+                            <label for="int-purchase-annual-investment-during" class="block text-sm font-medium text-gray-300">Annual Investment during fixed term expenses</label>
+                            <input type="number" id="int-purchase-annual-investment-during" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                        </div>
+
+                        <div>
                             <label for="int-other-annual-abs" class="block text-sm font-medium text-gray-300">Additional Annual Expenses (Absolute)</label>
                             <input type="number" id="int-other-annual-abs" value="1500" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
@@ -103,10 +108,10 @@
                             <label for="int-selling-costs-pct" class="block text-sm font-medium text-gray-300">Selling Costs (% of Final Price)</label>
                             <input type="number" id="int-selling-costs-pct" value="5.0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
-
+                        
                         <div>
-                            <label for="int-purchase-annual-investment" class="block text-sm font-medium text-gray-300">Annual Investment</label>
-                            <input type="number" id="int-purchase-annual-investment" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <label for="int-purchase-annual-investment-after" class="block text-sm font-medium text-gray-300">Annual Investment after fixed term expenses</label>
+                            <input type="number" id="int-purchase-annual-investment-after" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
                     </div>
 
@@ -223,7 +228,8 @@
         function getVal(id) {
             const el = document.getElementById(id);
             if (!el) {
-                console.error('Element not found:', id);
+                // This will log an error if an ID is wrong, but allows execution to continue
+                console.error('Element not found:', id); 
                 return 0;
             }
             return parseFloat(el.value) || 0;
@@ -258,7 +264,11 @@
             const otherAnnualAbs = getVal('int-other-annual-abs'); // This is the owner's additional annual
             const otherAnnualPct = getVal('int-other-annual-pct') / 100;
             const appreciation = getVal('int-home-appreciation') / 100;
-            const purchaseAnnualInvestment = getVal('int-purchase-annual-investment');
+            
+            // NEW/RENAMED INVESTMENT INPUTS
+            const purchaseAnnualInvestmentDuring = getVal('int-purchase-annual-investment-during');
+            const purchaseAnnualInvestmentAfter = getVal('int-purchase-annual-investment-after');
+
             const endTermPct = getVal('int-end-term-pct') / 100;
             const endTermAbs = getVal('int-end-term-abs');
             const sellingCostsPct = getVal('int-selling-costs-pct') / 100;
@@ -279,7 +289,10 @@
             
             // 1. Owner's Initial State
             const initialClosingCosts = (homePrice * initialCostsPct) + initialCostsAbs;
-            const initialOwnerCashOutlay = homePrice + initialClosingCosts; // Total cash spent at T=0
+            // The initialOwnerCashOutlay is the capital the renter invests at T=0
+            // Assuming the renter starts with the initial deposit and the owner's costs are sunk.
+            // For simplicity in this model, let's assume all initial owner costs are sunk, and the renter's initial investment is from the deposit.
+
             let ownerInvestmentPortfolio = 0; // Owner has a separate portfolio
             let ownerPortfolioBasis = 0; // To track contributions for cap gains
 
@@ -287,18 +300,24 @@
             let renterInvestment = initialDeposit; // Renter starts with the initial deposit
             let renterPortfolioBasis = initialDeposit; // To track contributions for cap gains
 
+            // --- Simulation Setup (Inflation Tracking) ---
+            let currentHomeValue = homePrice;
+            let currentOtherAnnualAbs = otherAnnualAbs; 
+            let currentRentAdditionalAnnualAbs = rentAdditionalAnnualAbs; 
+            
+            // Initialize inflating tracking variables for Owner's annual investment
+            let currentPurchaseAnnualInvestmentDuring = purchaseAnnualInvestmentDuring;
+            let currentPurchaseAnnualInvestmentAfter = purchaseAnnualInvestmentAfter;
+            let currentRentalAnnualInvestment = rentalAnnualInvestment; // Only needs to be inflated
+
             // --- Simulation ---
             let ownerNetWorthHistory = [];
             let renterNetWorthHistory = [];
             
-            let currentHomeValue = homePrice;
-            let currentOtherAnnualAbs = otherAnnualAbs; // Track inflating cost for owner
-            let currentRentAdditionalAnnualAbs = rentAdditionalAnnualAbs; // Track inflating cost for renter
-            let currentPurchaseAnnualInvestment = purchaseAnnualInvestment; // Track inflating investment
-            let currentRentalAnnualInvestment = rentalAnnualInvestment; // Track inflating investment
-
             // Year 0
-            ownerNetWorthHistory.push(currentHomeValue + ownerInvestmentPortfolio);
+            // NOTE: The Owner's initial cash outlay (Home Price + Initial Costs) is not reflected in net worth unless equity or loan is tracked. 
+            // In this cash-purchase model, we track Home Value + Investment Portfolio.
+            ownerNetWorthHistory.push(currentHomeValue + ownerInvestmentPortfolio); 
             renterNetWorthHistory.push(renterInvestment);
 
             for (let year = 1; year <= years; year++) {
@@ -307,15 +326,24 @@
                 const annualOther = currentOtherAnnualAbs + (currentHomeValue * otherAnnualPct);
                 const totalOwnerCosts = annualFixed + annualOther;
                 
+                // Determine the owner's annual investment based on fixed term
+                const annualOwnerInvestment = (year <= fixedTermYears)
+                    ? currentPurchaseAnnualInvestmentDuring
+                    : currentPurchaseAnnualInvestmentAfter;
+
                 // Owner's separate investment
-                ownerInvestmentPortfolio += currentPurchaseAnnualInvestment;
-                ownerPortfolioBasis += currentPurchaseAnnualInvestment; // Add contribution to basis
+                ownerInvestmentPortfolio += annualOwnerInvestment;
+                ownerPortfolioBasis += annualOwnerInvestment; // Add contribution to basis
                 ownerInvestmentPortfolio *= (1 + investmentRate); // Grow portfolio
                 
                 // Update values for *next* year
                 currentHomeValue *= (1 + appreciation);
                 currentOtherAnnualAbs *= (1 + inflation);
-                currentPurchaseAnnualInvestment *= (1 + inflation);
+                
+                // Inflate both investment amounts for next year, regardless of which was used this year
+                currentPurchaseAnnualInvestmentDuring *= (1 + inflation);
+                currentPurchaseAnnualInvestmentAfter *= (1 + inflation);
+
 
                 // --- Renter Simulation ---
                 const renterCost = currentRent + currentRentAdditionalAnnualAbs;
@@ -323,11 +351,13 @@
                 // Renter invests the difference AND their own annual investment
                 const annualSavings = totalOwnerCosts - renterCost;
                 
+                // Renter's savings are invested
                 renterInvestment += annualSavings;
-                renterPortfolioBasis += annualSavings; // Add savings to basis
+                renterPortfolioBasis += annualSavings;
                 
+                // Renter's annual investment is added
                 renterInvestment += currentRentalAnnualInvestment;
-                renterPortfolioBasis += currentRentalAnnualInvestment; // Add contribution to basis
+                renterPortfolioBasis += currentRentalAnnualInvestment;
                 
                 renterInvestment *= (1 + investmentRate); // Grow portfolio
 
@@ -368,7 +398,7 @@
             let finalRenterNetWorth = renterInvestment;
             const renterGains = finalRenterNetWorth - renterPortfolioBasis;
             if (renterGains > 0) {
-                finalRSenterNetWorth -= (renterGains * capGainsTax);
+                finalRenterNetWorth -= (renterGains * capGainsTax);
             }
             
             return {
