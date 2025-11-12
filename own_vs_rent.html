@@ -88,6 +88,11 @@
                             <label for="int-home-appreciation" class="block text-sm font-medium text-gray-300">Home Yearly Appreciation (%)</label>
                             <input type="number" id="int-home-appreciation" value="3.0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
+
+                        <div>
+                            <label for="int-purchase-annual-investment" class="block text-sm font-medium text-gray-300">Annual Investment</label>
+                            <input type="number" id="int-purchase-annual-investment" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                        </div>
                         
                         <div>
                             <label for="int-end-term-pct" class="block text-sm font-medium text-gray-300">Expenses at End of Term (% of Price)</label>
@@ -122,11 +127,21 @@
                             <label for="int-rent-additional-annual-abs" class="block text-sm font-medium text-gray-300">Additional Annual Expenses (Absolute)</label>
                             <input type="number" id="int-rent-additional-annual-abs" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
+
+                        <div>
+                            <label for="int-rental-annual-investment" class="block text-sm font-medium text-gray-300">Annual Investment</label>
+                            <input type="number" id="int-rental-annual-investment" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                        </div>
                     </div>
 
                     <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-4">
                         <h2 class="text-2xl font-semibold text-white border-b border-gray-700 pb-3">Investment Inputs</h2>
                         
+                        <div>
+                            <label for="int-initial-deposit" class="block text-sm font-medium text-gray-300">Initial Deposit (for Renter)</label>
+                            <input type="number" id="int-initial-deposit" value="77000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                        </div>
+
                         <div>
                             <label for="int-investment-return" class="block text-sm font-medium text-gray-300">Investment Return (%/year)</label>
                             <input type="number" id="int-investment-return" value="6.0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
@@ -234,7 +249,7 @@
          * @returns {object} - An object containing final values and history arrays.
          */
         function calculateInternational(years) {
-            // Get all input values
+            // --- Get Purchase Inputs ---
             const homePrice = getVal('int-home-price');
             const initialCostsPct = getVal('int-initial-costs-pct') / 100;
             const initialCostsAbs = getVal('int-initial-costs-abs');
@@ -242,69 +257,88 @@
             const fixedTermYears = getVal('int-fixed-term-years');
             const otherAnnualAbs = getVal('int-other-annual-abs'); // This is the owner's additional annual
             const otherAnnualPct = getVal('int-other-annual-pct') / 100;
+            const appreciation = getVal('int-home-appreciation') / 100;
+            const purchaseAnnualInvestment = getVal('int-purchase-annual-investment');
             const endTermPct = getVal('int-end-term-pct') / 100;
             const endTermAbs = getVal('int-end-term-abs');
-            const appreciation = getVal('int-home-appreciation') / 100;
             const sellingCostsPct = getVal('int-selling-costs-pct') / 100;
-            const inflation = getVal('inflation') / 100; // Get inflation from top control
-
+            
+            // --- Get Rental Inputs ---
             let currentRent = getVal('int-annual-rent');
             const rentIncrease = getVal('int-rent-increase') / 100;
             const rentAdditionalAnnualAbs = getVal('int-rent-additional-annual-abs'); // Get renter's additional annual
+            const rentalAnnualInvestment = getVal('int-rental-annual-investment');
 
+            // --- Get Global/Investment Inputs ---
+            const inflation = getVal('inflation') / 100; // Get inflation from top control
+            const initialDeposit = getVal('int-initial-deposit');
             const investmentRate = getVal('int-investment-return') / 100;
             const capGainsTax = getVal('int-cap-gains-tax') / 100;
 
             // --- Initial Calculations ---
-            // This model assumes a cash purchase as no loan is specified.
             
-            // 1. Owner's Initial Costs
+            // 1. Owner's Initial State
             const initialClosingCosts = (homePrice * initialCostsPct) + initialCostsAbs;
-            const initialOwnerCashOutlay = homePrice + initialClosingCosts;
+            const initialOwnerCashOutlay = homePrice + initialClosingCosts; // Total cash spent at T=0
+            let ownerInvestmentPortfolio = 0; // Owner has a separate portfolio
+            let ownerPortfolioBasis = 0; // To track contributions for cap gains
 
             // 2. Renter's Initial State
-            let renterInvestment = initialOwnerCashOutlay; // Renter invests the full cash amount
+            let renterInvestment = initialDeposit; // Renter starts with the initial deposit
+            let renterPortfolioBasis = initialDeposit; // To track contributions for cap gains
 
             // --- Simulation ---
             let ownerNetWorthHistory = [];
             let renterNetWorthHistory = [];
+            
             let currentHomeValue = homePrice;
-            let currentOtherAnnualAbs = otherAnnualAbs; // Track the inflating cost for owner
-            let currentRentAdditionalAnnualAbs = rentAdditionalAnnualAbs; // Track the inflating cost for renter
+            let currentOtherAnnualAbs = otherAnnualAbs; // Track inflating cost for owner
+            let currentRentAdditionalAnnualAbs = rentAdditionalAnnualAbs; // Track inflating cost for renter
+            let currentPurchaseAnnualInvestment = purchaseAnnualInvestment; // Track inflating investment
+            let currentRentalAnnualInvestment = rentalAnnualInvestment; // Track inflating investment
 
             // Year 0
-            ownerNetWorthHistory.push(currentHomeValue); // Owner's net worth is the home value
+            ownerNetWorthHistory.push(currentHomeValue + ownerInvestmentPortfolio);
             renterNetWorthHistory.push(renterInvestment);
 
             for (let year = 1; year <= years; year++) {
                 // --- Owner Simulation ---
                 const annualFixed = (year <= fixedTermYears) ? fixedTermAbs : 0;
-                
-                // Use current home value for % cost, and inflating abs cost
                 const annualOther = currentOtherAnnualAbs + (currentHomeValue * otherAnnualPct);
                 const totalOwnerCosts = annualFixed + annualOther;
                 
-                // Appreciate home value for *next* year's calculation
-                currentHomeValue *= (1 + appreciation);
+                // Owner's separate investment
+                ownerInvestmentPortfolio += currentPurchaseAnnualInvestment;
+                ownerPortfolioBasis += currentPurchaseAnnualInvestment; // Add contribution to basis
+                ownerInvestmentPortfolio *= (1 + investmentRate); // Grow portfolio
                 
-                // Inflate absolute cost for *next* year's calculation
+                // Update values for *next* year
+                currentHomeValue *= (1 + appreciation);
                 currentOtherAnnualAbs *= (1 + inflation);
+                currentPurchaseAnnualInvestment *= (1 + inflation);
 
                 // --- Renter Simulation ---
                 const renterCost = currentRent + currentRentAdditionalAnnualAbs;
                 
-                // Inflate rent for *next* year's calculation
-                currentRent *= (1 + rentIncrease);
-                // Inflate renter's additional cost for *next* year's calculation
-                currentRentAdditionalAnnualAbs *= (1 + inflation);
-                
-                // Renter invests the difference
+                // Renter invests the difference AND their own annual investment
                 const annualSavings = totalOwnerCosts - renterCost;
+                
                 renterInvestment += annualSavings;
-                renterInvestment *= (1 + investmentRate);
+                renterPortfolioBasis += annualSavings; // Add savings to basis
+                
+                renterInvestment += currentRentalAnnualInvestment;
+                renterPortfolioBasis += currentRentalAnnualInvestment; // Add contribution to basis
+                
+                renterInvestment *= (1 + investmentRate); // Grow portfolio
+
+                // Update values for *next* year
+                currentRent *= (1 + rentIncrease);
+                currentRentAdditionalAnnualAbs *= (1 + inflation);
+                currentRentalAnnualInvestment *= (1 + inflation);
                 
                 // --- Store History ---
-                ownerNetWorthHistory.push(currentHomeValue);
+                const currentOwnerNetWorth = currentHomeValue + ownerInvestmentPortfolio;
+                ownerNetWorthHistory.push(currentOwnerNetWorth);
                 renterNetWorthHistory.push(renterInvestment);
             }
 
@@ -313,17 +347,26 @@
             // 1. Owner sells
             const sellingCosts = currentHomeValue * sellingCostsPct;
             const endTermCosts = (currentHomeValue * endTermPct) + endTermAbs;
-            let finalOwnerNetWorth = currentHomeValue - sellingCosts - endTermCosts;
-
-            // Apply Capital Gains Tax (Owner)
-            const ownerGains = finalOwnerNetWorth - homePrice; // Simplified gain calculation
-            if (ownerGains > 0) {
-                finalOwnerNetWorth -= (ownerGains * capGainsTax);
+            
+            // Final Home Value (after costs and taxes)
+            let finalHomeValue = currentHomeValue - sellingCosts - endTermCosts;
+            const homeGains = finalHomeValue - homePrice; // Simplified gain calculation
+            if (homeGains > 0) {
+                finalHomeValue -= (homeGains * capGainsTax);
             }
+
+            // Final Portfolio Value (after taxes)
+            let finalOwnerPortfolio = ownerInvestmentPortfolio;
+            const ownerPortfolioGains = finalOwnerPortfolio - ownerPortfolioBasis;
+            if (ownerPortfolioGains > 0) {
+                finalOwnerPortfolio -= (ownerPortfolioGains * capGainsTax);
+            }
+            
+            const finalOwnerNetWorth = finalHomeValue + finalOwnerPortfolio;
 
             // 2. Renter cashes out
             let finalRenterNetWorth = renterInvestment;
-            const renterGains = finalRenterNetWorth - initialOwnerCashOutlay;
+            const renterGains = finalRenterNetWorth - renterPortfolioBasis;
             if (renterGains > 0) {
                 finalRenterNetWorth -= (renterGains * capGainsTax);
             }
