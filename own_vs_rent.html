@@ -31,10 +31,14 @@
     <div class="max-w-7xl mx-auto">
         <h1 class="text-3xl font-bold text-center text-white mb-8">Buy vs. Rent Calculator</h1>
 
-        <div class="bg-gray-800 p-6 rounded-xl shadow-lg mb-8 max-w-md mx-auto">
+        <div class="bg-gray-800 p-6 rounded-xl shadow-lg mb-8 max-w-2xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
                 <label for="analysis-period" class="block text-lg font-semibold text-white">Analysis Period (Years)</label>
                 <input type="number" id="analysis-period" value="10" class="w-full mt-2 bg-gray-700 border border-gray-600 rounded-md p-3 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label for="inflation" class="block text-lg font-semibold text-white">Yearly Inflation (%)</label>
+                <input type="number" id="inflation" value="2.0" class="w-full mt-2 bg-gray-700 border border-gray-600 rounded-md p-3 focus:ring-blue-500 focus:border-blue-500">
             </div>
         </div>
 
@@ -44,11 +48,6 @@
                     
                     <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-4">
                         <h2 class="text-2xl font-semibold text-white border-b border-gray-700 pb-3">Purchase Inputs</h2>
-
-                        <div>
-                            <label for="int-inflation" class="block text-sm font-medium text-gray-300">Yearly Inflation (%)</label>
-                            <input type="number" id="int-inflation" value="2.0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
-                        </div>
                         
                         <div>
                             <label for="int-home-price" class="block text-sm font-medium text-gray-300">Home Initial Price</label>
@@ -89,7 +88,7 @@
                             <label for="int-home-appreciation" class="block text-sm font-medium text-gray-300">Home Yearly Appreciation (%)</label>
                             <input type="number" id="int-home-appreciation" value="3.0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
-
+                        
                         <div>
                             <label for="int-end-term-pct" class="block text-sm font-medium text-gray-300">Expenses at End of Term (% of Price)</label>
                             <input type="number" id="int-end-term-pct" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
@@ -110,7 +109,7 @@
                         <h2 class="text-2xl font-semibold text-white border-b border-gray-700 pb-3">Rental Inputs</h2>
                         
                         <div>
-                            <label for="int-annual-rent" class="block text-sm font-medium text-gray-300">Annual Rent (Absolute)</label>
+                            <label for="int-annual-rent" class="block text-sm font-medium text-gray-300">Annual Rent (Absolute)</Tabel>
                             <input type="number" id="int-annual-rent" value="20000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
@@ -241,17 +240,17 @@
             const initialCostsAbs = getVal('int-initial-costs-abs');
             const fixedTermAbs = getVal('int-fixed-term-abs');
             const fixedTermYears = getVal('int-fixed-term-years');
-            const otherAnnualAbs = getVal('int-other-annual-abs');
+            const otherAnnualAbs = getVal('int-other-annual-abs'); // This is the owner's additional annual
             const otherAnnualPct = getVal('int-other-annual-pct') / 100;
             const endTermPct = getVal('int-end-term-pct') / 100;
             const endTermAbs = getVal('int-end-term-abs');
             const appreciation = getVal('int-home-appreciation') / 100;
             const sellingCostsPct = getVal('int-selling-costs-pct') / 100;
-            const inflation = getVal('int-inflation') / 100;
+            const inflation = getVal('inflation') / 100; // Get inflation from top control
 
             let currentRent = getVal('int-annual-rent');
             const rentIncrease = getVal('int-rent-increase') / 100;
-            let currentRentAdditionalAnnualAbs = getVal('int-rent-additional-annual-abs');
+            const rentAdditionalAnnualAbs = getVal('int-rent-additional-annual-abs'); // Get renter's additional annual
 
             const investmentRate = getVal('int-investment-return') / 100;
             const capGainsTax = getVal('int-cap-gains-tax') / 100;
@@ -270,7 +269,8 @@
             let ownerNetWorthHistory = [];
             let renterNetWorthHistory = [];
             let currentHomeValue = homePrice;
-            let currentOtherAnnualAbs = otherAnnualAbs; // Track the inflating cost
+            let currentOtherAnnualAbs = otherAnnualAbs; // Track the inflating cost for owner
+            let currentRentAdditionalAnnualAbs = rentAdditionalAnnualAbs; // Track the inflating cost for renter
 
             // Year 0
             ownerNetWorthHistory.push(currentHomeValue); // Owner's net worth is the home value
@@ -292,8 +292,10 @@
 
                 // --- Renter Simulation ---
                 const renterCost = currentRent + currentRentAdditionalAnnualAbs;
+                
                 // Inflate rent for *next* year's calculation
                 currentRent *= (1 + rentIncrease);
+                // Inflate renter's additional cost for *next* year's calculation
                 currentRentAdditionalAnnualAbs *= (1 + inflation);
                 
                 // Renter invests the difference
