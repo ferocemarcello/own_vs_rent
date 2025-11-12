@@ -88,11 +88,6 @@
                             <label for="int-home-appreciation" class="block text-sm font-medium text-gray-300">Home Yearly Appreciation (%)</label>
                             <input type="number" id="int-home-appreciation" value="3.0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
-
-                        <div>
-                            <label for="int-purchase-annual-investment" class="block text-sm font-medium text-gray-300">Annual Investment</label>
-                            <input type="number" id="int-purchase-annual-investment" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
-                        </div>
                         
                         <div>
                             <label for="int-end-term-pct" class="block text-sm font-medium text-gray-300">Expenses at End of Term (% of Price)</label>
@@ -107,6 +102,11 @@
                         <div>
                             <label for="int-selling-costs-pct" class="block text-sm font-medium text-gray-300">Selling Costs (% of Final Price)</label>
                             <input type="number" id="int-selling-costs-pct" value="5.0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                        </div>
+
+                        <div>
+                            <label for="int-purchase-annual-investment" class="block text-sm font-medium text-gray-300">Annual Investment</label>
+                            <input type="number" id="int-purchase-annual-investment" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
                     </div>
 
@@ -368,7 +368,7 @@
             let finalRenterNetWorth = renterInvestment;
             const renterGains = finalRenterNetWorth - renterPortfolioBasis;
             if (renterGains > 0) {
-                finalRenterNetWorth -= (renterGains * capGainsTax);
+                finalRSenterNetWorth -= (renterGains * capGainsTax);
             }
             
             return {
