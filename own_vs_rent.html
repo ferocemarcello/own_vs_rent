@@ -65,12 +65,12 @@
                         </div>
 
                         <div>
-                            <label for="int-fixed-term-abs" class="block text-sm font-medium text-gray-300">Annual Expenses with Fixed Term (Absolute)(e.g. mortgage)</label>
+                            <label for="int-fixed-term-abs" class="block text-sm font-medium text-gray-300">Yearly Expenses with Fixed Term (Absolute)(e.g. mortgage)</label>
                             <input type="number" id="int-fixed-term-abs" value="20000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
-                            <label for="int-fixed-term-years" class="block text-sm font-medium text-gray-300">Years for Fixed Term Expenses</label>
+                            <label for="int-fixed-term-years" class="block text-sm font-medium text-gray-300">Years for Fixed Term Expenses(e.g. mortgage duration)</label>
                             <input type="number" id="int-fixed-term-years" value="10" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
                         
@@ -85,13 +85,13 @@
                         </div>
 
                         <div>
-                            <label for="int-other-annual-abs" class="block text-sm font-medium text-gray-300">Additional Annual Expenses (Absolute)</label>
-                            <input type="number" id="int-other-annual-abs" value="5000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <label for="int-other-yearly-abs" class="block text-sm font-medium text-gray-300">Additional Yearly Expenses (Absolute)</label>
+                            <input type="number" id="int-other-yearly-abs" value="5000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
-                            <label for="int-other-annual-pct" class="block text-sm font-medium text-gray-300">Other Annual Expenses (% of Home Value)</label>
-                            <input type="number" id="int-other-annual-pct" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <label for="int-other-yearly-pct" class="block text-sm font-medium text-gray-300">Other Yearly Expenses (% of Home Value)</label>
+                            <input type="number" id="int-other-yearly-pct" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
@@ -115,8 +115,8 @@
                         </div>
                         
                         <div>
-                            <label for="int-purchase-annual-investment-after" class="block text-sm font-medium text-gray-300">Yearly Deposit after fixed term</label>
-                            <input type="number" id="int-purchase-annual-investment-after" value="30700" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <label for="int-purchase-yearly-investment-after" class="block text-sm font-medium text-gray-300">Yearly Deposit after fixed term</label>
+                            <input type="number" id="int-purchase-yearly-investment-after" value="30700" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
                     </div>
 
@@ -124,8 +124,8 @@
                         <h2 class="text-2xl font-semibold text-white border-b border-gray-700 pb-3">Rental Inputs</h2>
                         
                         <div>
-                            <label for="int-annual-rent" class="block text-sm font-medium text-gray-300">Annual Rent (Absolute)</Tabel>
-                            <input type="number" id="int-annual-rent" value="7795" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <label for="int-yearly-rent" class="block text-sm font-medium text-gray-300">Yearly Rent (Absolute)</Tabel>
+                            <input type="number" id="int-yearly-rent" value="7795" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
@@ -134,8 +134,8 @@
                         </div>
 
                         <div>
-                            <label for="int-rent-additional-annual-abs" class="block text-sm font-medium text-gray-300">Additional Annual Expenses (Absolute)</label>
-                            <input type="number" id="int-rent-additional-annual-abs" value="150" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <label for="int-rent-additional-yearly-abs" class="block text-sm font-medium text-gray-300">Additional Yearly Expenses (Absolute)</label>
+                            <input type="number" id="int-rent-additional-yearly-abs" value="150" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
@@ -290,24 +290,24 @@
             
             const fixedTermAbs = getVal('int-fixed-term-abs');
             const fixedTermYears = getVal('int-fixed-term-years');
-            const otherAnnualAbs = getVal('int-other-annual-abs');
-            const otherAnnualPct = getVal('int-other-annual-pct') / 100;
+            const otherYearlyAbs = getVal('int-other-yearly-abs');
+            const otherYearlyPct = getVal('int-other-yearly-pct') / 100;
             const appreciation = getVal('int-home-appreciation') / 100;
             const endTermPct = getVal('int-end-term-pct') / 100;
             const endTermAbs = getVal('int-end-term-abs');
             const sellingCostsPct = getVal('int-selling-costs-pct') / 100;
 
             // --- Get Renter Inputs ---
-            let currentRent = getVal('int-annual-rent');
+            let currentRent = getVal('int-yearly-rent');
             const rentIncrease = getVal('int-rent-increase') / 100;
-            const rentAdditionalAnnualAbs = getVal('int-rent-additional-annual-abs');
+            const rentAdditionalYearlyAbs = getVal('int-rent-additional-yearly-abs');
 
             // --- Get Deposit/Investment Inputs ---
             const initialDepositBuyer = getVal('int-initial-deposit-buyer');
             const initialDepositRenter = getVal('int-initial-deposit-renter');
 
             const depositDuringFixedTerm = getVal('int-purchase-yearly-deposit');
-            const depositAfterFixedTerm = getVal('int-purchase-annual-investment-after');
+            const depositAfterFixedTerm = getVal('int-purchase-yearly-investment-after');
             const buyerDepositIncrease = getVal('int-purchase-yearly-deposit-increase') / 100;
             
             let currentYearlyDepositRenter = getVal('int-rental-yearly-deposit');
@@ -321,8 +321,8 @@
 
             // --- Simulation Setup (Tracking Variables) ---
             let currentHomeValue = homePrice;
-            let currentOtherAnnualAbs = otherAnnualAbs; 
-            let currentRentAdditionalAnnualAbs = rentAdditionalAnnualAbs; 
+            let currentOtherYearlyAbs = otherYearlyAbs; 
+            let currentRentAdditionalYearlyAbs = rentAdditionalYearlyAbs; 
             let currentDepositDuring = depositDuringFixedTerm;
             let currentDepositAfter = depositAfterFixedTerm;
 
@@ -338,7 +338,7 @@
             
             yearByYearData.push({
                 year: 0,
-                type: 'Annual',
+                type: 'Yearly',
                 owner: {
                     costs: { fixed: 0, otherAbsolute: 0, otherPercent: 0, total: 0 },
                     investment: { deposit: 0, totalPortfolio: ownerInvestmentPortfolio },
@@ -358,24 +358,24 @@
                 const eoyHomeValue = currentHomeValue * (1 + appreciation);
 
                 // --- 2. Owner Simulation ---
-                const annualFixed = (year <= fixedTermYears) ? fixedTermAbs : 0;
-                const ownerOtherPercentCost = currentHomeValue * otherAnnualPct;
-                const annualOther = currentOtherAnnualAbs + ownerOtherPercentCost;
-                const totalOwnerCosts = annualFixed + annualOther;
+                const yearlyFixed = (year <= fixedTermYears) ? fixedTermAbs : 0;
+                const ownerOtherPercentCost = currentHomeValue * otherYearlyPct;
+                const yearlyOther = currentOtherYearlyAbs + ownerOtherPercentCost;
+                const totalOwnerCosts = yearlyFixed + yearlyOther;
                 
-                const annualOwnerDeposit = (year <= fixedTermYears)
+                const yearlyOwnerDeposit = (year <= fixedTermYears)
                     ? currentDepositDuring
                     : currentDepositAfter;
 
                 // --- 3. Renter Simulation ---
-                const renterCost = currentRent + currentRentAdditionalAnnualAbs;
-                const annualSavings = totalOwnerCosts - renterCost;
+                const renterCost = currentRent + currentRentAdditionalYearlyAbs;
+                const yearlySavings = totalOwnerCosts - renterCost;
                 
                 // --- 4. Apply Investments & Growth (Pre-Transaction State) ---
-                let ownerPortfolioBeforeGrowth = ownerInvestmentPortfolio + annualOwnerDeposit;
+                let ownerPortfolioBeforeGrowth = ownerInvestmentPortfolio + yearlyOwnerDeposit;
                 let eoyOwnerPortfolio = ownerPortfolioBeforeGrowth * (1 + investmentRate);
                 
-                let renterPortfolioBeforeGrowth = renterInvestment + currentYearlyDepositRenter + annualSavings;
+                let renterPortfolioBeforeGrowth = renterInvestment + currentYearlyDepositRenter + yearlySavings;
                 let eoyRenterPortfolio = renterPortfolioBeforeGrowth * (1 + investmentRate);
 
                 let eoyOwnerNetWorth = eoyHomeValue + eoyOwnerPortfolio;
@@ -404,16 +404,16 @@
 
                 yearByYearData.push({
                     year: year,
-                    type: 'Annual',
+                    type: 'Yearly',
                     owner: {
                         costs: { 
-                            fixed: annualFixed, 
-                            otherAbsolute: currentOtherAnnualAbs, 
+                            fixed: yearlyFixed, 
+                            otherAbsolute: currentOtherYearlyAbs, 
                             otherPercent: ownerOtherPercentCost, 
                             total: totalOwnerCosts 
                         },
                         investment: { 
-                            deposit: annualOwnerDeposit, 
+                            deposit: yearlyOwnerDeposit, 
                             totalPortfolio: eoyOwnerPortfolio // Store EOY value
                         },
                         homeValue: eoyHomeValue, // Store EOY value
@@ -422,12 +422,12 @@
                     renter: {
                         costs: { 
                             rent: currentRent, 
-                            otherAbsolute: currentRentAdditionalAnnualAbs, 
+                            otherAbsolute: currentRentAdditionalYearlyAbs, 
                             total: renterCost 
                         },
                         investment: { 
                             deposit: currentYearlyDepositRenter, 
-                            savings: annualSavings, 
+                            savings: yearlySavings, 
                             totalPortfolio: eoyRenterPortfolio // Store EOY value
                         },
                         netWorth: eoyRenterNetWorth
@@ -457,24 +457,24 @@
                 renterInvestment = eoyRenterPortfolio; // Update for next loop 
 
                 // Update basis
-                ownerPortfolioBasis += annualOwnerDeposit;
+                ownerPortfolioBasis += yearlyOwnerDeposit;
                 renterPortfolioBasis += currentYearlyDepositRenter;
-                if (annualSavings > 0) {
-                    renterPortfolioBasis += annualSavings;
+                if (yearlySavings > 0) {
+                    renterPortfolioBasis += yearlySavings;
                 }
 
                 // Inflate costs/deposits for next loop
-                currentOtherAnnualAbs *= (1 + inflation);
+                currentOtherYearlyAbs *= (1 + inflation);
                 currentDepositDuring *= (1 + buyerDepositIncrease);
                 currentDepositAfter *= (1 + buyerDepositIncrease);
                 currentRent *= (1 + rentIncrease);
-                currentRentAdditionalAnnualAbs *= (1 + inflation);
+                currentRentAdditionalYearlyAbs *= (1 + inflation);
                 currentYearlyDepositRenter *= (1 + yearlyDepositIncreaseRenter);
             }
 
             // --- Final Calculations (Post-Simulation Transaction) ---
             
-            // State at the end of the analysis period (after all annual growth/expenses)
+            // State at the end of the analysis period (after all yearly growth/expenses)
             const finalOwnerHomeValue = currentHomeValue;
             const finalOwnerPortfolio = ownerInvestmentPortfolio;
             const finalRenterPortfolio = renterInvestment;
@@ -720,8 +720,8 @@
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-lime-400">${formatCurrency(r.finalNetWorth)}</td>
                         </tr>
                     `;
-                } else if (yearData.type === 'Annual') {
-                    // Standard Annual Row
+                } else if (yearData.type === 'Yearly') {
+                    // Standard Yearly Row
                     const o = yearData.owner;
                     const r = yearData.renter;
                     const ownerOtherTotal = o.costs.otherAbsolute + o.costs.otherPercent;
