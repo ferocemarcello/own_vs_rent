@@ -483,18 +483,9 @@
             const sellingCost = finalOwnerHomeValue * sellingCostsPct;
             let homeProceeds = finalOwnerHomeValue - sellingCost;
             
-            // Home Capital Gains Tax: REMOVED as per user request. Only selling costs apply.
+            // Home Capital Gains Tax: REMOVED as per previous user request. Only selling costs apply.
             let homeTax = 0;
-            // Original logic for reference (now removed):
-            /*
-            const homeGains = homeProceeds - initialHomeBasis; 
-            if (homeGains > 0) {
-                homeTax = homeGains * capGainsTax;
-                homeProceeds -= homeTax; // Deducting tax
-            }
-            */
             
-
             // 2. Owner Portfolio Liquidation Tax
             const ownerPortfolioGains = finalOwnerPortfolio - ownerPortfolioBasis;
             let ownerPortfolioTax = 0;
