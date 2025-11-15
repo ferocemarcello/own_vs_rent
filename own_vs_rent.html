@@ -483,17 +483,18 @@
             const sellingCost = finalOwnerHomeValue * sellingCostsPct;
             let homeProceeds = finalOwnerHomeValue - sellingCost;
             
-            // Home Capital Gains Tax: REMOVED as per previous user request. Only selling costs apply.
+            // Home Capital Gains Tax: REMOVED as per user request. Only selling costs apply.
             let homeTax = 0;
             
-            // 2. Owner Portfolio Liquidation Tax
+
+            // 2. Owner Portfolio Liquidation Tax: Applied ONLY to gains
             const ownerPortfolioGains = finalOwnerPortfolio - ownerPortfolioBasis;
             let ownerPortfolioTax = 0;
             if (ownerPortfolioGains > 0) {
                 ownerPortfolioTax = ownerPortfolioGains * capGainsTax;
             }
             
-            // 3. Renter Portfolio Liquidation Tax
+            // 3. Renter Portfolio Liquidation Tax: Applied ONLY to gains
             const renterGains = finalRenterPortfolio - renterPortfolioBasis;
             let renterTax = 0;
             if (renterGains > 0) {
@@ -501,24 +502,28 @@
             }
             
             // Calculate final net worths
-            // Home proceeds are now tax-free (only selling costs deducted)
+            // Final Net Worth = Home Proceeds (after selling costs) + (Total Portfolio - Tax on Gains)
             const finalOwnerNetWorth = homeProceeds + (finalOwnerPortfolio - ownerPortfolioTax); 
             const finalRenterNetWorth = finalRenterPortfolio - renterTax;
 
-            // Add transaction row for Final Sale/Liquidation
+            // Add transaction row for Final Sale/Liquidation (Added Basis and Gains for Table Clarity)
             yearByYearData.push({
                 year: years,
                 type: 'FinalSale',
                 owner: {
                     salePrice: finalOwnerHomeValue,
                     sellingCost: sellingCost,
-                    homeTax: homeTax, // This will be 0
+                    homeTax: homeTax, 
                     ownerPortfolio: finalOwnerPortfolio,
+                    ownerPortfolioBasis: ownerPortfolioBasis, // ADDED for table clarity
+                    ownerPortfolioGains: ownerPortfolioGains, // ADDED for table clarity
                     ownerPortfolioTax: ownerPortfolioTax,
                     finalNetWorth: finalOwnerNetWorth
                 },
                 renter: {
                     portfolio: finalRenterPortfolio,
+                    renterPortfolioBasis: renterPortfolioBasis, // ADDED for table clarity
+                    renterGains: renterGains, // ADDED for table clarity
                     renterTax: renterTax,
                     finalNetWorth: finalRenterNetWorth
                 }
@@ -581,6 +586,7 @@
             const sellingCostsPctForTable = getVal('int-selling-costs-pct'); 
             const endTermPctForTable = getVal('int-end-term-pct');
             const endTermAbsForTable = getVal('int-end-term-abs');
+            const capGainsTaxForTable = getVal('int-cap-gains-tax');
 
             let tableHTML = `
                 <table class="min-w-full divide-y divide-gray-700">
@@ -614,12 +620,10 @@
                 
                 if (yearData.type === 'EndTermExpense') {
                     const o = yearData.owner;
-                    const homeValueAtTermEnd = o.homeValueAtTermEnd; // Retrieve Home Value for calculation breakdown
+                    const homeValueAtTermEnd = o.homeValueAtTermEnd; 
                     
-                    // Calculation breakdown:
-                    // Note: endTermPctForTable is a percentage (e.g., 5.0). Must divide by 100 for calculation.
                     const pctExpenseAmount = homeValueAtTermEnd * (endTermPctForTable / 100);
-                    const absExpenseAmount = endTermAbsForTable; // Absolute value is already a number
+                    const absExpenseAmount = endTermAbsForTable; 
                     
                     // End-of-Term Expense Row - Detailed Transaction Summary
                     tableHTML += `
@@ -685,30 +689,45 @@
                         <tr class="bg-gray-700">
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-green-300"></td>
                             <td colspan="6" class="py-4 px-3 text-sm font-semibold text-green-300 text-right">
-                                HOME SALE: Capital Gains Tax (Now Excluded)
+                                HOME SALE: Capital Gains Tax (Confirmed EXCLUDED)
                             </td>
-                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-red-500">-${formatCurrency(o.homeTax)}</td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-green-400">${formatCurrency(o.homeTax)}</td>
                             <td colspan="7" class="py-4 px-3 text-sm font-semibold text-gray-400"></td>
                         </tr>
                         <tr class="bg-gray-700 border-b-2 border-green-500">
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-green-300"></td>
-                            <td colspan="3" class="py-4 px-3 text-sm font-semibold text-green-300 text-right">
-                                PORTFOLIO: Tax on Investment Gains
+                            <td colspan="7" class="py-2 px-3 text-sm font-semibold text-white">
+                                <div class="p-2 bg-gray-800 rounded-lg border border-cyan-500/50">
+                                    <p class="font-bold text-cyan-300 mb-1">OWNER PORTFOLIO LIQUIDATION (${capGainsTaxForTable}% CGT)</p>
+                                    <p class="text-xs text-gray-400">Total Portfolio Value: ${formatCurrency(o.ownerPortfolio)}</p>
+                                    <p class="text-xs text-gray-400">Total Invested Basis: ${formatCurrency(o.ownerPortfolioBasis)}</p>
+                                    <p class="text-yellow-300 font-medium">Taxable Gain (Return): ${formatCurrency(o.ownerPortfolioGains)}</p>
+                                    <p class="text-red-400 font-medium">Tax on Gain: -${formatCurrency(o.ownerPortfolioTax)}</p>
+                                    <p class="font-bold border-t border-gray-600 mt-2 pt-2">Net Portfolio Proceeds: ${formatCurrency(o.ownerPortfolio - o.ownerPortfolioTax)}</p>
+                                </div>
                             </td>
-                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-red-500">-${formatCurrency(o.ownerPortfolioTax)}</td>
-                            <td colspan="2" class="py-4 px-3 text-sm font-semibold text-green-300 text-right">
-                                FINAL OWNER NET WORTH
+                            <td colspan="7" class="py-2 px-3 text-sm font-semibold text-white">
+                                <div class="p-2 bg-gray-800 rounded-lg border border-lime-500/50">
+                                    <p class="font-bold text-lime-300 mb-1">RENTER PORTFOLIO LIQUIDATION (${capGainsTaxForTable}% CGT)</p>
+                                    <p class="text-xs text-gray-400">Total Portfolio Value: ${formatCurrency(r.portfolio)}</p>
+                                    <p class="text-xs text-gray-400">Total Invested Basis: ${formatCurrency(r.renterPortfolioBasis)}</p>
+                                    <p class="text-yellow-300 font-medium">Taxable Gain (Return): ${formatCurrency(r.renterGains)}</p>
+                                    <p class="text-red-400 font-medium">Tax on Gain: -${formatCurrency(r.renterTax)}</p>
+                                    <p class="font-bold border-t border-gray-600 mt-2 pt-2">Net Portfolio Proceeds: ${formatCurrency(r.portfolio - r.renterTax)}</p>
+                                </div>
                             </td>
-                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-cyan-400">${formatCurrency(o.finalNetWorth)}</td>
+                        </tr>
+                        <tr class="bg-gray-700 border-b-2 border-green-500">
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-green-300"></td>
+                            <td colspan="6" class="py-4 px-3 text-sm font-semibold text-green-300 text-right">
+                                FINAL OWNER NET WORTH (Home Proceeds + Net Portfolio)
+                            </td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-cyan-400 text-xl">${formatCurrency(o.finalNetWorth)}</td>
                             
-                            <td colspan="5" class="py-4 px-3 text-sm font-semibold text-green-300 text-right">
-                                PORTFOLIO: Tax on Investment Gains
+                            <td colspan="7" class="py-4 px-3 text-sm font-semibold text-lime-400 text-right">
+                                FINAL RENTER NET WORTH (Net Portfolio Proceeds)
                             </td>
-                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-red-500">-${formatCurrency(r.renterTax)}</td>
-                            <td class="whitespace-nowrap py-4 px-3 text-sm font-semibold text-lime-400 text-right">
-                                FINAL RENTER NET WORTH
-                            </td>
-                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-lime-400">${formatCurrency(r.finalNetWorth)}</td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-lime-400 text-xl">${formatCurrency(r.finalNetWorth)}</td>
                         </tr>
                     `;
                 } else if (yearData.type === 'Yearly') {
