@@ -284,6 +284,9 @@
             const homePrice = getVal('int-home-price');
             const initialCostsPct = getVal('int-initial-costs-pct') / 100;
             const initialCostsAbs = getVal('int-initial-costs-abs');
+            // Calculate true home cost basis for tax purposes (Price + Initial Costs)
+            const initialHomeBasis = homePrice * (1 + initialCostsPct) + initialCostsAbs; 
+            
             const fixedTermAbs = getVal('int-fixed-term-abs');
             const fixedTermYears = getVal('int-fixed-term-years');
             const otherAnnualAbs = getVal('int-other-annual-abs');
@@ -390,8 +393,7 @@
                     eoyOwnerPortfolio -= endTermTransactionCost;
                     eoyOwnerNetWorth -= endTermTransactionCost;
                     
-                    // Update basis for capital gains calculation
-                    ownerPortfolioBasis -= endTermTransactionCost; 
+                    // The investment basis (money put in) is NOT reduced by the expense paid from the growth.
                 }
 
                 
@@ -480,7 +482,8 @@
             let homeProceeds = finalOwnerHomeValue - sellingCost;
             
             // Home Capital Gains Tax
-            const homeGains = homeProceeds - homePrice;
+            // Corrected to use the full initial cost basis (price + initial costs)
+            const homeGains = homeProceeds - initialHomeBasis; 
             let homeTax = 0;
             if (homeGains > 0) {
                 homeTax = homeGains * capGainsTax;
@@ -577,6 +580,9 @@
         function renderTable(data) {
             const container = document.getElementById('results-table-container');
             if (!container) return;
+            
+            // Corrected: Get selling costs percentage in this function's scope for the table text
+            const sellingCostsPctForTable = getVal('int-selling-costs-pct'); 
 
             let tableHTML = `
                 <table class="min-w-full divide-y divide-gray-700">
@@ -614,17 +620,20 @@
                     tableHTML += `
                         <tr class="bg-gray-700 border-t-2 border-yellow-500">
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-yellow-300">Year ${year}</td>
-                            <td colspan="7" class="py-4 px-3 text-sm font-semibold text-yellow-300 text-right">
+                            <td colspan="4" class="py-4 px-3 text-sm font-semibold text-yellow-300 text-right">
                                 EXPENSE: End of Fixed Term Costs (Deducted from Owner Portfolio)
                             </td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-red-500">-${formatCurrency(o.endTermCost)}</td>
-                            <td colspan="6" class="py-4 px-3 text-sm font-semibold text-gray-400"></td>
+                            <td colspan="2" class="py-4 px-3 text-sm font-semibold text-yellow-300 text-right">
+                                NEW OWNER NET WORTH
+                            </td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-cyan-400">${formatCurrency(o.netWorthAfter)}</td>
+                            <td colspan="7" class="py-4 px-3 text-sm font-semibold text-gray-400"></td>
                         </tr>
                     `;
                 } else if (yearData.type === 'FinalSale') {
                     const o = yearData.owner;
                     const r = yearData.renter;
-                    const analysisYears = getVal('analysis-period');
                     
                     // Final Sale/Liquidation Transaction Row - Home Sale/Costs
                     tableHTML += `
@@ -639,7 +648,7 @@
                         <tr class="bg-gray-700">
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-green-300"></td>
                             <td colspan="6" class="py-4 px-3 text-sm font-semibold text-green-300 text-right">
-                                HOME SALE: Selling Costs (${(sellingCostsPct * 100).toFixed(1)}% of Price)
+                                HOME SALE: Selling Costs (${sellingCostsPctForTable.toFixed(1)}% of Price)
                             </td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-red-500">-${formatCurrency(o.sellingCost)}</td>
                             <td colspan="7" class="py-4 px-3 text-sm font-semibold text-gray-400"></td>
