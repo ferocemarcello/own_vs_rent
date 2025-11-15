@@ -261,10 +261,11 @@
          * @returns {string} - Formatted currency string.
          */
         function formatCurrency(value) {
+            // Use Math.round for display consistency but keep the number format cleaner
             return new Intl.NumberFormat('en-US', {
                 style: 'decimal',
                 maximumFractionDigits: 0,
-            }).format(value);
+            }).format(Math.round(value));
         }
 
         // --- Calculation Logic ---
@@ -371,14 +372,11 @@
                 const annualSavings = totalOwnerCosts - renterCost;
                 
                 // --- 4. Apply Investments & Growth (Pre-Transaction State) ---
-                let eoyOwnerPortfolio = ownerInvestmentPortfolio;
-                eoyOwnerPortfolio += annualOwnerDeposit;
-                eoyOwnerPortfolio *= (1 + investmentRate);
+                let ownerPortfolioBeforeGrowth = ownerInvestmentPortfolio + annualOwnerDeposit;
+                let eoyOwnerPortfolio = ownerPortfolioBeforeGrowth * (1 + investmentRate);
                 
-                let eoyRenterPortfolio = renterInvestment;
-                eoyRenterPortfolio += currentYearlyDepositRenter;
-                eoyRenterPortfolio += annualSavings;
-                eoyRenterPortfolio *= (1 + investmentRate);
+                let renterPortfolioBeforeGrowth = renterInvestment + currentYearlyDepositRenter + annualSavings;
+                let eoyRenterPortfolio = renterPortfolioBeforeGrowth * (1 + investmentRate);
 
                 let eoyOwnerNetWorth = eoyHomeValue + eoyOwnerPortfolio;
                 const eoyRenterNetWorth = eoyRenterPortfolio;
@@ -386,6 +384,8 @@
                 
                 // --- 5. Apply Fixed-Term Expiration Expenses (If applicable) ---
                 let endTermTransactionCost = 0;
+                let ownerNetWorthBeforeEndTerm = eoyOwnerNetWorth;
+
                 if (year === fixedTermYears && fixedTermYears > 0) {
                     endTermTransactionCost = (eoyHomeValue * endTermPct) + endTermAbs;
                     
@@ -393,7 +393,7 @@
                     eoyOwnerPortfolio -= endTermTransactionCost;
                     eoyOwnerNetWorth -= endTermTransactionCost;
                     
-                    // The investment basis (money put in) is NOT reduced by the expense paid from the growth.
+                    // Note: Basis is not changed as this is payment from the portfolio's growth/principal.
                 }
 
                 
@@ -441,7 +441,8 @@
                         type: 'EndTermExpense',
                         owner: {
                             endTermCost: endTermTransactionCost,
-                            netWorthAfter: eoyOwnerNetWorth
+                            netWorthAfter: eoyOwnerNetWorth,
+                            netWorthBefore: ownerNetWorthBeforeEndTerm // Pass pre-deduction value
                         },
                         renter: {
                             netWorthAfter: eoyRenterNetWorth
@@ -482,7 +483,7 @@
             let homeProceeds = finalOwnerHomeValue - sellingCost;
             
             // Home Capital Gains Tax
-            // Corrected to use the full initial cost basis (price + initial costs)
+            // Used the full initial cost basis (price + initial costs)
             const homeGains = homeProceeds - initialHomeBasis; 
             let homeTax = 0;
             if (homeGains > 0) {
@@ -581,8 +582,9 @@
             const container = document.getElementById('results-table-container');
             if (!container) return;
             
-            // Corrected: Get selling costs percentage in this function's scope for the table text
             const sellingCostsPctForTable = getVal('int-selling-costs-pct'); 
+            const endTermPctForTable = getVal('int-end-term-pct');
+            const endTermAbsForTable = getVal('int-end-term-abs');
 
             let tableHTML = `
                 <table class="min-w-full divide-y divide-gray-700">
@@ -616,19 +618,22 @@
                 
                 if (yearData.type === 'EndTermExpense') {
                     const o = yearData.owner;
-                    // End-of-Term Expense Row
+                    // End-of-Term Expense Row - Now a proper gap/transaction summary
                     tableHTML += `
-                        <tr class="bg-gray-700 border-t-2 border-yellow-500">
-                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-yellow-300">Year ${year}</td>
-                            <td colspan="4" class="py-4 px-3 text-sm font-semibold text-yellow-300 text-right">
-                                EXPENSE: End of Fixed Term Costs (Deducted from Owner Portfolio)
+                        <tr class="bg-gray-700 border-t-2 border-yellow-500 border-b-2 border-yellow-500">
+                            <td colspan="15" class="py-2 px-3 text-sm font-semibold text-yellow-300 text-center">
+                                <div class="flex justify-between items-center py-1">
+                                    <span class="font-bold text-lg">YEAR ${year} END OF FIXED TERM EXPENSE TRANSACTION</span>
+                                    <span class="text-base text-gray-400">Owner Net Worth BEFORE Deduction: <span class="text-white">${formatCurrency(o.netWorthBefore)}</span></span>
+                                </div>
+                                <div class="flex justify-between items-center bg-gray-600 p-2 rounded mt-1">
+                                    <span class="text-white">Total Expense: (${endTermPctForTable.toFixed(1)}% of Home Value) + ${formatCurrency(endTermAbsForTable)} (Absolute)</span>
+                                    <span class="font-bold text-xl text-red-400">DEDUCTION: -${formatCurrency(o.endTermCost)}</span>
+                                </div>
+                                <div class="text-right mt-1 font-bold text-lg text-cyan-400">
+                                    Owner Net Worth AFTER Deduction: ${formatCurrency(o.netWorthAfter)}
+                                </div>
                             </td>
-                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-red-500">-${formatCurrency(o.endTermCost)}</td>
-                            <td colspan="2" class="py-4 px-3 text-sm font-semibold text-yellow-300 text-right">
-                                NEW OWNER NET WORTH
-                            </td>
-                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-cyan-400">${formatCurrency(o.netWorthAfter)}</td>
-                            <td colspan="7" class="py-4 px-3 text-sm font-semibold text-gray-400"></td>
                         </tr>
                     `;
                 } else if (yearData.type === 'FinalSale') {
