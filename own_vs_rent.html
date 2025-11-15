@@ -483,14 +483,17 @@
             const sellingCost = finalOwnerHomeValue * sellingCostsPct;
             let homeProceeds = finalOwnerHomeValue - sellingCost;
             
-            // Home Capital Gains Tax
-            // Used the full initial cost basis (price + initial costs)
-            const homeGains = homeProceeds - initialHomeBasis; 
+            // Home Capital Gains Tax: REMOVED as per user request. Only selling costs apply.
             let homeTax = 0;
+            // Original logic for reference (now removed):
+            /*
+            const homeGains = homeProceeds - initialHomeBasis; 
             if (homeGains > 0) {
                 homeTax = homeGains * capGainsTax;
-                homeProceeds -= homeTax;
+                homeProceeds -= homeTax; // Deducting tax
             }
+            */
+            
 
             // 2. Owner Portfolio Liquidation Tax
             const ownerPortfolioGains = finalOwnerPortfolio - ownerPortfolioBasis;
@@ -507,7 +510,8 @@
             }
             
             // Calculate final net worths
-            const finalOwnerNetWorth = homeProceeds + (finalOwnerPortfolio - ownerPortfolioTax);
+            // Home proceeds are now tax-free (only selling costs deducted)
+            const finalOwnerNetWorth = homeProceeds + (finalOwnerPortfolio - ownerPortfolioTax); 
             const finalRenterNetWorth = finalRenterPortfolio - renterTax;
 
             // Add transaction row for Final Sale/Liquidation
@@ -517,7 +521,7 @@
                 owner: {
                     salePrice: finalOwnerHomeValue,
                     sellingCost: sellingCost,
-                    homeTax: homeTax,
+                    homeTax: homeTax, // This will be 0
                     ownerPortfolio: finalOwnerPortfolio,
                     ownerPortfolioTax: ownerPortfolioTax,
                     finalNetWorth: finalOwnerNetWorth
@@ -690,7 +694,7 @@
                         <tr class="bg-gray-700">
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-green-300"></td>
                             <td colspan="6" class="py-4 px-3 text-sm font-semibold text-green-300 text-right">
-                                HOME SALE: Capital Gains Tax
+                                HOME SALE: Capital Gains Tax (Now Excluded)
                             </td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-red-500">-${formatCurrency(o.homeTax)}</td>
                             <td colspan="7" class="py-4 px-3 text-sm font-semibold text-gray-400"></td>
