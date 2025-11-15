@@ -80,15 +80,6 @@
                         </div>
 
                         <div>
-                            <label for="int-purchase-yearly-deposit" class="block text-sm font-medium text-gray-300">Yearly Deposit (for Buyer)</label>
-                            <input type="number" id="int-purchase-yearly-deposit" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
-                        </div>
-
-                        <div>
-                            <label for="int-purchase-yearly-deposit-increase" class="block text-sm font-medium text-gray-300">Yearly Deposit Increase (%/year) (for Buyer)</label>
-                            <input type="number" id="int-purchase-yearly-deposit-increase" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
-                        </div>
-                        <div>
                             <label for="int-other-annual-abs" class="block text-sm font-medium text-gray-300">Additional Annual Expenses (Absolute)</label>
                             <input type="number" id="int-other-annual-abs" value="1500" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
@@ -143,15 +134,6 @@
                         </div>
 
                         <div>
-                            <label for="int-rental-yearly-deposit" class="block text-sm font-medium text-gray-300">Yearly Deposit (for Renter)</label>
-                            <input type="number" id="int-rental-yearly-deposit" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
-                        </div>
-
-                        <div>
-                            <label for="int-rental-yearly-deposit-increase" class="block text-sm font-medium text-gray-300">Yearly Deposit Increase (%/year) (for Renter)</label>
-                            <input type="number" id="int-rental-yearly-deposit-increase" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
-                        </div>
-                        <div>
                             <label for="int-rental-annual-investment" class="block text-sm font-medium text-gray-300">Annual Investment</label>
                             <input type="number" id="int-rental-annual-investment" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
@@ -168,6 +150,26 @@
                         <div>
                             <label for="int-initial-deposit-renter" class="block text-sm font-medium text-gray-300">Initial Deposit (for Renter)</label>
                             <input type="number" id="int-initial-deposit-renter" value="77000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                        </div>
+
+                        <div>
+                            <label for="int-purchase-yearly-deposit" class="block text-sm font-medium text-gray-300">Yearly Deposit (for Buyer)</label>
+                            <input type="number" id="int-purchase-yearly-deposit" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                        </div>
+
+                        <div>
+                            <label for="int-purchase-yearly-deposit-increase" class="block text-sm font-medium text-gray-300">Yearly Deposit Increase (%/year) (for Buyer)</label>
+                            <input type="number" id="int-purchase-yearly-deposit-increase" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                        </div>
+
+                        <div>
+                            <label for="int-rental-yearly-deposit" class="block text-sm font-medium text-gray-300">Yearly Deposit (for Renter)</label>
+                            <input type="number" id="int-rental-yearly-deposit" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                        </div>
+
+                        <div>
+                            <label for="int-rental-yearly-deposit-increase" class="block text-sm font-medium text-gray-300">Yearly Deposit Increase (%/year) (for Renter)</label>
+                            <input type="number" id="int-rental-yearly-deposit-increase" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
                         <div>
                             <label for="int-investment-return" class="block text-sm font-medium text-gray-300">Investment Return (%/year)</label>
@@ -302,7 +304,7 @@
             const rentAdditionalAnnualAbs = getVal('int-rent-additional-annual-abs');
             const rentalAnnualInvestment = getVal('int-rental-annual-investment');
 
-            // --- Get NEW Deposit/Investment Inputs ---
+            // --- Get Deposit/Investment Inputs ---
             const initialDepositBuyer = getVal('int-initial-deposit-buyer');
             const initialDepositRenter = getVal('int-initial-deposit-renter');
 
@@ -315,7 +317,6 @@
             // --- Initial State (Year 0) ---
             
             // 1. Owner's Initial State
-            // The initialClosingCosts are sunk, they do not go into the investment portfolio.
             let ownerInvestmentPortfolio = initialDepositBuyer;
             let ownerPortfolioBasis = initialDepositBuyer;
 
@@ -390,7 +391,14 @@
                 
                 // Renter's savings from difference in costs is added
                 renterInvestment += annualSavings;
-                renterPortfolioBasis += annualSavings;
+                // Add savings to basis only if positive (it's a contribution)
+                if (annualSavings > 0) {
+                    renterPortfolioBasis += annualSavings;
+                }
+                // Note: If savings are negative, it implies renter costs are higher. 
+                // In this model, this negative saving is 'paid' from the investment portfolio.
+                // The basis (contributions) doesn't decrease, but the portfolio value does.
+                
                 
                 // 3. Portfolio Growth
                 renterInvestment *= (1 + investmentRate); 
@@ -444,7 +452,7 @@
             };
         }
         
-        // --- Display Functions (omitted for brevity, remains unchanged from previous versions) ---
+        // --- Display Functions ---
 
         /**
          * Renders the results and the chart.
@@ -520,7 +528,7 @@
                                 color: '#d1d5db', // gray-300
                                 callback: function(value) {
                                     return formatCurrency(value);
-                                }
+D                                }
                             },
                             grid: {
                                 color: 'rgba(255, 255, 255, 0.1)' // White with alpha
