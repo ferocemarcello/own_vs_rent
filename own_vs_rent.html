@@ -101,12 +101,12 @@
                         
                         <div>
                             <label for="int-end-term-pct" class="block text-sm font-medium text-gray-300">Expenses at End of Term (% of Price)</label>
-                            <input type="number" id="int-end-term-pct" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <input type="number" id="int-end-term-pct" value="5" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
                             <label for="int-end-term-abs" class="block text-sm font-medium text-gray-300">Expenses at End of Term (Absolute)</label>
-                            <input type="number" id="int-end-term-abs" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <input type="number" id="int-end-term-abs" value="10000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
                         
                         <div>
@@ -442,7 +442,8 @@
                         owner: {
                             endTermCost: endTermTransactionCost,
                             netWorthAfter: eoyOwnerNetWorth,
-                            netWorthBefore: ownerNetWorthBeforeEndTerm // Pass pre-deduction value
+                            netWorthBefore: ownerNetWorthBeforeEndTerm, // Pass pre-deduction value
+                            homeValueAtTermEnd: eoyHomeValue // Pass Home Value for breakdown
                         },
                         renter: {
                             netWorthAfter: eoyRenterNetWorth
@@ -618,20 +619,48 @@
                 
                 if (yearData.type === 'EndTermExpense') {
                     const o = yearData.owner;
-                    // End-of-Term Expense Row - Now a proper gap/transaction summary
+                    const homeValueAtTermEnd = o.homeValueAtTermEnd; // Retrieve Home Value for calculation breakdown
+                    
+                    // Calculation breakdown:
+                    // Note: endTermPctForTable is a percentage (e.g., 5.0). Must divide by 100 for calculation.
+                    const pctExpenseAmount = homeValueAtTermEnd * (endTermPctForTable / 100);
+                    const absExpenseAmount = endTermAbsForTable; // Absolute value is already a number
+                    
+                    // End-of-Term Expense Row - Detailed Transaction Summary
                     tableHTML += `
                         <tr class="bg-gray-700 border-t-2 border-yellow-500 border-b-2 border-yellow-500">
-                            <td colspan="15" class="py-2 px-3 text-sm font-semibold text-yellow-300 text-center">
-                                <div class="flex justify-between items-center py-1">
-                                    <span class="font-bold text-lg">YEAR ${year} END OF FIXED TERM EXPENSE TRANSACTION</span>
-                                    <span class="text-base text-gray-400">Owner Net Worth BEFORE Deduction: <span class="text-white">${formatCurrency(o.netWorthBefore)}</span></span>
-                                </div>
-                                <div class="flex justify-between items-center bg-gray-600 p-2 rounded mt-1">
-                                    <span class="text-white">Total Expense: (${endTermPctForTable.toFixed(1)}% of Home Value) + ${formatCurrency(endTermAbsForTable)} (Absolute)</span>
-                                    <span class="font-bold text-xl text-red-400">DEDUCTION: -${formatCurrency(o.endTermCost)}</span>
-                                </div>
-                                <div class="text-right mt-1 font-bold text-lg text-cyan-400">
-                                    Owner Net Worth AFTER Deduction: ${formatCurrency(o.netWorthAfter)}
+                            <td colspan="15" class="py-4 px-3 text-sm text-center">
+                                <span class="font-bold text-xl text-yellow-300 block mb-4">YEAR ${year} END OF FIXED TERM EXPENSE TRANSACTION</span>
+                                
+                                <div class="grid grid-cols-4 gap-4 items-center bg-gray-800 p-4 rounded-lg">
+                                    <div class="text-right text-gray-400 font-bold text-lg">Owner Net Worth BEFORE Deduction:</div>
+                                    <div class="text-left text-white font-bold text-lg">${formatCurrency(o.netWorthBefore)}</div>
+                                    <div></div>
+                                    <div></div>
+                                    
+                                    <div class="text-right text-yellow-300 font-medium border-t border-gray-600 pt-3">Expense Component 1 (% of Price):</div>
+                                    <div class="text-left text-white border-t border-gray-600 pt-3">${endTermPctForTable.toFixed(1)}% of Home Value (${formatCurrency(homeValueAtTermEnd)})</div>
+                                    <div class="text-right text-red-400 border-t border-gray-600 pt-3">Deducted Amount:</div>
+                                    <div class="text-left text-red-400 font-medium border-t border-gray-600 pt-3">-${formatCurrency(pctExpenseAmount)}</div>
+                                    
+                                    <div class="text-right text-yellow-300 font-medium">Expense Component 2 (Absolute):</div>
+                                    <div class="text-left text-white">${formatCurrency(absExpenseAmount)} (Input Value)</div>
+                                    <div class="text-right text-red-400">Deducted Amount:</div>
+                                    <div class="text-left text-red-400 font-medium">-${formatCurrency(absExpenseAmount)}</div>
+
+                                    <div class="col-span-4 border-t border-gray-600 my-2"></div>
+
+                                    <div class="text-right text-yellow-300 font-bold text-xl">TOTAL DEDUCTION:</div>
+                                    <div></div>
+                                    <div class="text-right text-red-400 font-bold text-2xl"></div>
+                                    <div class="text-left text-red-400 font-bold text-2xl">-${formatCurrency(o.endTermCost)}</div>
+
+                                    <div class="col-span-4 border-t border-gray-600 my-2"></div>
+
+                                    <div class="text-right text-cyan-400 font-bold text-xl">Owner Net Worth AFTER Deduction:</div>
+                                    <div class="text-left text-cyan-400 font-bold text-xl">${formatCurrency(o.netWorthAfter)}</div>
+                                    <div></div>
+                                    <div></div>
                                 </div>
                             </td>
                         </tr>
