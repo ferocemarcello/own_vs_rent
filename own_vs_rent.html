@@ -334,6 +334,7 @@
             
             yearByYearData.push({
                 year: 0,
+                type: 'Annual',
                 owner: {
                     costs: { fixed: 0, otherAbsolute: 0, otherPercent: 0, total: 0 },
                     investment: { deposit: 0, totalPortfolio: ownerInvestmentPortfolio },
@@ -366,7 +367,7 @@
                 const renterCost = currentRent + currentRentAdditionalAnnualAbs;
                 const annualSavings = totalOwnerCosts - renterCost;
                 
-                // --- 4. Apply Investments & Growth ---
+                // --- 4. Apply Investments & Growth (Pre-Transaction State) ---
                 let eoyOwnerPortfolio = ownerInvestmentPortfolio;
                 eoyOwnerPortfolio += annualOwnerDeposit;
                 eoyOwnerPortfolio *= (1 + investmentRate);
@@ -376,16 +377,32 @@
                 eoyRenterPortfolio += annualSavings;
                 eoyRenterPortfolio *= (1 + investmentRate);
 
-                // --- 5. Calculate EOY Net Worth ---
-                const eoyOwnerNetWorth = eoyHomeValue + eoyOwnerPortfolio;
+                let eoyOwnerNetWorth = eoyHomeValue + eoyOwnerPortfolio;
                 const eoyRenterNetWorth = eoyRenterPortfolio;
 
+                
+                // --- 5. Apply Fixed-Term Expiration Expenses (If applicable) ---
+                let endTermTransactionCost = 0;
+                if (year === fixedTermYears && fixedTermYears > 0) {
+                    endTermTransactionCost = (eoyHomeValue * endTermPct) + endTermAbs;
+                    
+                    // Deduct from portfolio and net worth
+                    eoyOwnerPortfolio -= endTermTransactionCost;
+                    eoyOwnerNetWorth -= endTermTransactionCost;
+                    
+                    // Update basis for capital gains calculation
+                    ownerPortfolioBasis -= endTermTransactionCost; 
+                }
+
+                
                 // --- 6. Store History & Data for Table ---
-                ownerNetWorthHistory.push(eoyOwnerNetWorth);
+                // Store Net Worth history for Chart AFTER end-term expense deduction (if applicable)
+                ownerNetWorthHistory.push(eoyOwnerNetWorth); 
                 renterNetWorthHistory.push(eoyRenterNetWorth);
 
                 yearByYearData.push({
                     year: year,
+                    type: 'Annual',
                     owner: {
                         costs: { 
                             fixed: annualFixed, 
@@ -415,10 +432,25 @@
                     }
                 });
 
+                // If Fixed Term expired, insert a transaction row
+                if (year === fixedTermYears && fixedTermYears > 0 && endTermTransactionCost > 0) {
+                    yearByYearData.push({
+                        year: year,
+                        type: 'EndTermExpense',
+                        owner: {
+                            endTermCost: endTermTransactionCost,
+                            netWorthAfter: eoyOwnerNetWorth
+                        },
+                        renter: {
+                            netWorthAfter: eoyRenterNetWorth
+                        }
+                    });
+                }
+
                 // --- 7. Update tracking variables for NEXT year ---
                 currentHomeValue = eoyHomeValue; // Update for next loop
-                ownerInvestmentPortfolio = eoyOwnerPortfolio; // Update for next loop
-                renterInvestment = eoyRenterPortfolio; // Update for next loop
+                ownerInvestmentPortfolio = eoyOwnerPortfolio; // Update for next loop (includes end-term deduction)
+                renterInvestment = eoyRenterPortfolio; // Update for next loop 
 
                 // Update basis
                 ownerPortfolioBasis += annualOwnerDeposit;
@@ -436,40 +468,72 @@
                 currentYearlyDepositRenter *= (1 + yearlyDepositIncreaseRenter);
             }
 
-            // --- Final Calculations (End of Period) ---
+            // --- Final Calculations (Post-Simulation Transaction) ---
             
-            // 1. Owner sells (Home)
-            const sellingCosts = currentHomeValue * sellingCostsPct;
-            const endTermCosts = (currentHomeValue * endTermPct) + endTermAbs;
+            // State at the end of the analysis period (after all annual growth/expenses)
+            const finalOwnerHomeValue = currentHomeValue;
+            const finalOwnerPortfolio = ownerInvestmentPortfolio;
+            const finalRenterPortfolio = renterInvestment;
+
+            // 1. Owner Home Sale Transaction
+            const sellingCost = finalOwnerHomeValue * sellingCostsPct;
+            let homeProceeds = finalOwnerHomeValue - sellingCost;
             
-            let finalHomeValue = currentHomeValue - sellingCosts - endTermCosts;
-            const homeGains = finalHomeValue - homePrice;
+            // Home Capital Gains Tax
+            const homeGains = homeProceeds - homePrice;
+            let homeTax = 0;
             if (homeGains > 0) {
-                finalHomeValue -= (homeGains * capGainsTax);
+                homeTax = homeGains * capGainsTax;
+                homeProceeds -= homeTax;
             }
 
-            // 2. Owner cashes out (Portfolio)
-            let finalOwnerPortfolio = ownerInvestmentPortfolio;
+            // 2. Owner Portfolio Liquidation Tax
             const ownerPortfolioGains = finalOwnerPortfolio - ownerPortfolioBasis;
+            let ownerPortfolioTax = 0;
             if (ownerPortfolioGains > 0) {
-                finalOwnerPortfolio -= (ownerPortfolioGains * capGainsTax);
+                ownerPortfolioTax = ownerPortfolioGains * capGainsTax;
             }
             
-            const finalOwnerNetWorth = finalHomeValue + finalOwnerPortfolio;
-
-            // 3. Renter cashes out
-            let finalRenterNetWorth = renterInvestment;
-            const renterGains = finalRenterNetWorth - renterPortfolioBasis;
+            // 3. Renter Portfolio Liquidation Tax
+            const renterGains = finalRenterPortfolio - renterPortfolioBasis;
+            let renterTax = 0;
             if (renterGains > 0) {
-                finalRenterNetWorth -= (renterGains * capGainsTax);
+                renterTax = renterGains * capGainsTax;
             }
+            
+            // Calculate final net worths
+            const finalOwnerNetWorth = homeProceeds + (finalOwnerPortfolio - ownerPortfolioTax);
+            const finalRenterNetWorth = finalRenterPortfolio - renterTax;
+
+            // Add transaction row for Final Sale/Liquidation
+            yearByYearData.push({
+                year: years,
+                type: 'FinalSale',
+                owner: {
+                    salePrice: finalOwnerHomeValue,
+                    sellingCost: sellingCost,
+                    homeTax: homeTax,
+                    ownerPortfolio: finalOwnerPortfolio,
+                    ownerPortfolioTax: ownerPortfolioTax,
+                    finalNetWorth: finalOwnerNetWorth
+                },
+                renter: {
+                    portfolio: finalRenterPortfolio,
+                    renterTax: renterTax,
+                    finalNetWorth: finalRenterNetWorth
+                }
+            });
+
+            // Update Net Worth History for final point to reflect sale/tax
+            ownerNetWorthHistory[years] = finalOwnerNetWorth;
+            renterNetWorthHistory[years] = finalRenterNetWorth;
             
             return {
                 owner: finalOwnerNetWorth,
                 renter: finalRenterNetWorth,
                 ownerHistory: ownerNetWorthHistory,
                 renterHistory: renterNetWorthHistory,
-                yearByYearData: yearByYearData // Pass the detailed data
+                yearByYearData: yearByYearData
             };
         }
         
@@ -507,7 +571,7 @@
         }
 
         /**
-         * NEW: Renders the year-by-year data table.
+         * Renders the year-by-year data table, including transaction rows.
          * @param {Array} data - The yearByYearData array from calculations.
          */
         function renderTable(data) {
@@ -516,7 +580,7 @@
 
             let tableHTML = `
                 <table class="min-w-full divide-y divide-gray-700">
-                    <thead class="bg-gray-800">
+                    <thead class="bg-gray-800 sticky top-0 z-10">
                         <tr>
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Year</th>
                             
@@ -542,36 +606,102 @@
 
             // Loop through data and build table rows
             data.forEach(yearData => {
-                const o = yearData.owner;
-                const r = yearData.renter;
+                const year = yearData.year;
                 
-                // Combine Owner's "Other" expenses
-                const ownerOtherTotal = o.costs.otherAbsolute + o.costs.otherPercent;
-                
-                // Combine Renter's "Other" expenses
-                const renterOtherTotal = r.costs.otherAbsolute;
+                if (yearData.type === 'EndTermExpense') {
+                    const o = yearData.owner;
+                    // End-of-Term Expense Row
+                    tableHTML += `
+                        <tr class="bg-gray-700 border-t-2 border-yellow-500">
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-yellow-300">Year ${year}</td>
+                            <td colspan="7" class="py-4 px-3 text-sm font-semibold text-yellow-300 text-right">
+                                EXPENSE: End of Fixed Term Costs (Deducted from Owner Portfolio)
+                            </td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-red-500">-${formatCurrency(o.endTermCost)}</td>
+                            <td colspan="6" class="py-4 px-3 text-sm font-semibold text-gray-400"></td>
+                        </tr>
+                    `;
+                } else if (yearData.type === 'FinalSale') {
+                    const o = yearData.owner;
+                    const r = yearData.renter;
+                    const analysisYears = getVal('analysis-period');
+                    
+                    // Final Sale/Liquidation Transaction Row - Home Sale/Costs
+                    tableHTML += `
+                        <tr class="bg-gray-700 border-t-2 border-green-500">
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-green-300">Year ${year}</td>
+                            <td colspan="6" class="py-4 px-3 text-sm font-semibold text-green-300 text-right">
+                                HOME SALE: Proceeds Before Costs
+                            </td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-white">${formatCurrency(o.salePrice)}</td>
+                            <td colspan="7" class="py-4 px-3 text-sm font-semibold text-gray-400"></td>
+                        </tr>
+                        <tr class="bg-gray-700">
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-green-300"></td>
+                            <td colspan="6" class="py-4 px-3 text-sm font-semibold text-green-300 text-right">
+                                HOME SALE: Selling Costs (${(sellingCostsPct * 100).toFixed(1)}% of Price)
+                            </td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-red-500">-${formatCurrency(o.sellingCost)}</td>
+                            <td colspan="7" class="py-4 px-3 text-sm font-semibold text-gray-400"></td>
+                        </tr>
+                        <tr class="bg-gray-700">
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-green-300"></td>
+                            <td colspan="6" class="py-4 px-3 text-sm font-semibold text-green-300 text-right">
+                                HOME SALE: Capital Gains Tax
+                            </td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-red-500">-${formatCurrency(o.homeTax)}</td>
+                            <td colspan="7" class="py-4 px-3 text-sm font-semibold text-gray-400"></td>
+                        </tr>
+                        <tr class="bg-gray-700 border-b-2 border-green-500">
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-green-300"></td>
+                            <td colspan="3" class="py-4 px-3 text-sm font-semibold text-green-300 text-right">
+                                PORTFOLIO: Tax on Investment Gains
+                            </td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-red-500">-${formatCurrency(o.ownerPortfolioTax)}</td>
+                            <td colspan="2" class="py-4 px-3 text-sm font-semibold text-green-300 text-right">
+                                FINAL OWNER NET WORTH
+                            </td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-cyan-400">${formatCurrency(o.finalNetWorth)}</td>
+                            
+                            <td colspan="5" class="py-4 px-3 text-sm font-semibold text-green-300 text-right">
+                                PORTFOLIO: Tax on Investment Gains
+                            </td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-red-500">-${formatCurrency(r.renterTax)}</td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-semibold text-lime-400 text-right">
+                                FINAL RENTER NET WORTH
+                            </td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-lime-400">${formatCurrency(r.finalNetWorth)}</td>
+                        </tr>
+                    `;
+                } else if (yearData.type === 'Annual') {
+                    // Standard Annual Row
+                    const o = yearData.owner;
+                    const r = yearData.renter;
+                    const ownerOtherTotal = o.costs.otherAbsolute + o.costs.otherPercent;
+                    const renterOtherTotal = r.costs.otherAbsolute;
 
-                tableHTML += `
-                    <tr>
-                        <td class="whitespace-nowrap py-4 px-3 text-sm font-medium text-white">${yearData.year}</td>
-                        
-                        <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(o.costs.fixed)}</td>
-                        <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(ownerOtherTotal)}</td>
-                        <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300 font-medium">${formatCurrency(o.costs.total)}</td>
-                        <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(o.investment.deposit)}</td>
-                        <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300 font-bold">${formatCurrency(o.investment.totalPortfolio)}</td>
-                        <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(o.homeValue)}</td>
-                        <td class="whitespace-nowrap py-4 px-3 text-sm text-cyan-400 font-bold">${formatCurrency(o.netWorth)}</td>
-                        
-                        <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(r.costs.rent)}</td>
-                        <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(renterOtherTotal)}</td>
-                        <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300 font-medium">${formatCurrency(r.costs.total)}</td>
-                        <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(r.investment.deposit)}</td>
-                        <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(r.investment.savings)}</td>
-                        <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300 font-bold">${formatCurrency(r.investment.totalPortfolio)}</td>
-                        <td class="whitespace-nowrap py-4 px-3 text-sm text-lime-400 font-bold">${formatCurrency(r.netWorth)}</td>
-                    </tr>
-                `;
+                    tableHTML += `
+                        <tr>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-medium text-white">${year}</td>
+                            
+                            <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(o.costs.fixed)}</td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(ownerOtherTotal)}</td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300 font-medium">${formatCurrency(o.costs.total)}</td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(o.investment.deposit)}</td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300 font-bold">${formatCurrency(o.investment.totalPortfolio)}</td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(o.homeValue)}</td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm text-cyan-400 font-bold">${formatCurrency(o.netWorth)}</td>
+                            
+                            <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(r.costs.rent)}</td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(renterOtherTotal)}</td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300 font-medium">${formatCurrency(r.costs.total)}</td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(r.investment.deposit)}</td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(r.investment.savings)}</td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300 font-bold">${formatCurrency(r.investment.totalPortfolio)}</td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm text-lime-400 font-bold">${formatCurrency(r.netWorth)}</td>
+                        </tr>
+                    `;
+                }
             });
 
             tableHTML += `
