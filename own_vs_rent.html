@@ -75,19 +75,15 @@
                         </div>
 
                         <div>
-                            <label for="int-purchase-annual-investment-during" class="block text-sm font-medium text-gray-300">Annual Investment during fixed term expenses</label>
-                            <input type="number" id="int-purchase-annual-investment-during" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
-                        </div>
-                        
-                        <div>
-                            <label for="int-purchase-yearly-deposit" class="block text-sm font-medium text-gray-300">Yearly Deposit (for Buyer)</label>
+                            <label for="int-purchase-yearly-deposit" class="block text-sm font-medium text-gray-300">Yearly Deposit during fixed term</label>
                             <input type="number" id="int-purchase-yearly-deposit" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
-                            <label for="int-purchase-yearly-deposit-increase" class="block text-sm font-medium text-gray-300">Yearly Deposit Increase (%/year) (for Buyer)</label>
+                            <label for="int-purchase-yearly-deposit-increase" class="block text-sm font-medium text-gray-300">Yearly Deposit Increase (%/year)</label>
                             <input type="number" id="int-purchase-yearly-deposit-increase" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
+
                         <div>
                             <label for="int-other-annual-abs" class="block text-sm font-medium text-gray-300">Additional Annual Expenses (Absolute)</label>
                             <input type="number" id="int-other-annual-abs" value="1500" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
@@ -119,7 +115,7 @@
                         </div>
                         
                         <div>
-                            <label for="int-purchase-annual-investment-after" class="block text-sm font-medium text-gray-300">Annual Investment after fixed term expenses</label>
+                            <label for="int-purchase-annual-investment-after" class="block text-sm font-medium text-gray-300">Yearly Deposit after fixed term</label>
                             <input type="number" id="int-purchase-annual-investment-after" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
                     </div>
@@ -143,17 +139,13 @@
                         </div>
 
                         <div>
-                            <label for="int-rental-yearly-deposit" class="block text-sm font-medium text-gray-300">Yearly Deposit (for Renter)</label>
+                            <label for="int-rental-yearly-deposit" class="block text-sm font-medium text-gray-300">Yearly Deposit</label>
                             <input type="number" id="int-rental-yearly-deposit" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
-                            <label for="int-rental-yearly-deposit-increase" class="block text-sm font-medium text-gray-300">Yearly Deposit Increase (%/year) (for Renter)</label>
+                            <label for="int-rental-yearly-deposit-increase" class="block text-sm font-medium text-gray-300">Yearly Deposit Increase (%/year)</label>
                             <input type="number" id="int-rental-yearly-deposit-increase" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
-                        </div>
-                        <div>
-                            <label for="int-rental-annual-investment" class="block text-sm font-medium text-gray-300">Annual Investment</label>
-                            <input type="number" id="int-rental-annual-investment" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
                     </div>
 
@@ -291,8 +283,6 @@
             const otherAnnualAbs = getVal('int-other-annual-abs');
             const otherAnnualPct = getVal('int-other-annual-pct') / 100;
             const appreciation = getVal('int-home-appreciation') / 100;
-            const purchaseAnnualInvestmentDuring = getVal('int-purchase-annual-investment-during');
-            const purchaseAnnualInvestmentAfter = getVal('int-purchase-annual-investment-after');
             const endTermPct = getVal('int-end-term-pct') / 100;
             const endTermAbs = getVal('int-end-term-abs');
             const sellingCostsPct = getVal('int-selling-costs-pct') / 100;
@@ -301,15 +291,17 @@
             let currentRent = getVal('int-annual-rent');
             const rentIncrease = getVal('int-rent-increase') / 100;
             const rentAdditionalAnnualAbs = getVal('int-rent-additional-annual-abs');
-            const rentalAnnualInvestment = getVal('int-rental-annual-investment');
 
             // --- Get Deposit/Investment Inputs ---
             const initialDepositBuyer = getVal('int-initial-deposit-buyer');
             const initialDepositRenter = getVal('int-initial-deposit-renter');
 
-            let currentYearlyDepositBuyer = getVal('int-purchase-yearly-deposit');
-            const yearlyDepositIncreaseBuyer = getVal('int-purchase-yearly-deposit-increase') / 100;
+            // NEW SIMPLIFIED BUYER DEPOSIT LOGIC
+            const depositDuringFixedTerm = getVal('int-purchase-yearly-deposit');
+            const depositAfterFixedTerm = getVal('int-purchase-annual-investment-after');
+            const buyerDepositIncrease = getVal('int-purchase-yearly-deposit-increase') / 100;
             
+            // RENTER DEPOSIT LOGIC
             let currentYearlyDepositRenter = getVal('int-rental-yearly-deposit');
             const yearlyDepositIncreaseRenter = getVal('int-rental-yearly-deposit-increase') / 100;
 
@@ -325,16 +317,12 @@
 
             // --- Simulation Setup (Tracking Variables) ---
             let currentHomeValue = homePrice;
-            // Owner's expenses that inflate by global inflation
             let currentOtherAnnualAbs = otherAnnualAbs; 
-            // Renter's expenses that inflate by global inflation
             let currentRentAdditionalAnnualAbs = rentAdditionalAnnualAbs; 
             
-            // Owner's Annual Investment amounts that inflate by global inflation
-            let currentPurchaseAnnualInvestmentDuring = purchaseAnnualInvestmentDuring;
-            let currentPurchaseAnnualInvestmentAfter = purchaseAnnualInvestmentAfter;
-            // Renter's Annual Investment amount that inflates by global inflation
-            let currentRentalAnnualInvestment = rentalAnnualInvestment; 
+            // Buyer's deposit tracking variables
+            let currentDepositDuring = depositDuringFixedTerm;
+            let currentDepositAfter = depositAfterFixedTerm;
 
             // --- Simulation ---
             let ownerNetWorthHistory = [];
@@ -352,16 +340,14 @@
                 const annualOther = currentOtherAnnualAbs + (currentHomeValue * otherAnnualPct);
                 const totalOwnerCosts = annualFixed + annualOther;
                 
-                const annualOwnerInvestment = (year <= fixedTermYears)
-                    ? currentPurchaseAnnualInvestmentDuring
-                    : currentPurchaseAnnualInvestmentAfter;
-
                 // 2. Deposit/Investment
-                ownerInvestmentPortfolio += currentYearlyDepositBuyer;
-                ownerPortfolioBasis += currentYearlyDepositBuyer;
+                // Determine the correct deposit amount for the current year
+                const annualOwnerDeposit = (year <= fixedTermYears)
+                    ? currentDepositDuring
+                    : currentDepositAfter;
 
-                ownerInvestmentPortfolio += annualOwnerInvestment;
-                ownerPortfolioBasis += annualOwnerInvestment;
+                ownerInvestmentPortfolio += annualOwnerDeposit;
+                ownerPortfolioBasis += annualOwnerDeposit;
                 
                 // 3. Portfolio Growth
                 ownerInvestmentPortfolio *= (1 + investmentRate);
@@ -369,9 +355,10 @@
                 // 4. Inflation for *Next* Year's Costs/Investments
                 currentHomeValue *= (1 + appreciation);
                 currentOtherAnnualAbs *= (1 + inflation);
-                currentPurchaseAnnualInvestmentDuring *= (1 + inflation);
-                currentPurchaseAnnualInvestmentAfter *= (1 + inflation);
-                currentYearlyDepositBuyer *= (1 + yearlyDepositIncreaseBuyer); // Deposit increases by its own rate
+                
+                // Inflate both deposit amounts by their own increase rate for next year
+                currentDepositDuring *= (1 + buyerDepositIncrease);
+                currentDepositAfter *= (1 + buyerDepositIncrease);
 
 
                 // --- Renter Simulation (Yearly cycle: Costs, Investment, Savings, Growth, Inflation) ---
@@ -384,13 +371,8 @@
                 renterInvestment += currentYearlyDepositRenter;
                 renterPortfolioBasis += currentYearlyDepositRenter;
                 
-                // Renter's annual investment is added
-                renterInvestment += currentRentalAnnualInvestment;
-                renterPortfolioBasis += currentRentalAnnualInvestment;
-                
                 // Renter's savings from difference in costs is added
                 renterInvestment += annualSavings;
-                // Add savings to basis only if positive (it's a contribution)
                 if (annualSavings > 0) {
                     renterPortfolioBasis += annualSavings;
                 }
@@ -401,7 +383,6 @@
                 // 4. Inflation for *Next* Year's Costs/Investments
                 currentRent *= (1 + rentIncrease);
                 currentRentAdditionalAnnualAbs *= (1 + inflation);
-                currentRentalAnnualInvestment *= (1 + inflation);
                 currentYearlyDepositRenter *= (1 + yearlyDepositIncreaseRenter); // Deposit increases by its own rate
 
                 
