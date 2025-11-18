@@ -181,8 +181,8 @@
                         </div>
 
                         <div>
-                            <label for="int-other-yearly-abs" class="block text-sm font-medium text-gray-300">Additional Yearly Expenses (Absolute)</label>
-                            <input type="number" id="int-other-yearly-abs" value="5000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <label for="int-additional-yearly-expenses-buyer" class="block text-sm font-medium text-gray-300">Additional Yearly Expenses (Absolute)</label>
+                            <input type="number" id="int-additional-yearly-expenses-buyer" value="5000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
@@ -230,8 +230,8 @@
                         </div>
 
                         <div>
-                            <label for="int-rent-additional-yearly-abs" class="block text-sm font-medium text-gray-300">Additional Yearly Expenses (Absolute)</label>
-                            <input type="number" id="int-rent-additional-yearly-abs" value="150" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <label for="int-rent-additional-yearly-expenses-abs" class="block text-sm font-medium text-gray-300">Additional Yearly Expenses (Absolute)</label>
+                            <input type="number" id="int-rent-additional-yearly-expenses-abs" value="150" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
@@ -399,7 +399,7 @@
             
             const fixedTermAbs = getVal('int-fixed-term-abs');
             const fixedTermYears = getVal('int-fixed-term-years');
-            const otherYearlyAbs = getVal('int-other-yearly-abs');
+            const additionalYearlyExpensesBuyerAbs = getVal('int-additional-yearly-expenses-buyer');
             const otherYearlyPct = getVal('int-other-yearly-pct') / 100;
             const appreciation = getVal('int-home-appreciation') / 100;
             const endTermPct = getVal('int-end-term-pct') / 100;
@@ -409,7 +409,7 @@
             // --- Get Renter Inputs ---
             let currentRent = getVal('int-yearly-rent');
             const rentIncrease = getVal('int-rent-increase') / 100;
-            const rentAdditionalYearlyAbs = getVal('int-rent-additional-yearly-abs');
+            const rentAdditionalYearlyExpensesAbs = getVal('int-rent-additional-yearly-expenses-abs');
 
             // --- Get Investment Inputs ---
             const initialPortfolioValueBuyer = getVal('int-initial-portfolio-value-buyer');
@@ -430,8 +430,8 @@
 
             // --- Simulation Setup (Tracking Variables) ---
             let currentHomeValue = homePrice;
-            let currentOtherYearlyAbs = otherYearlyAbs; 
-            let currentRentAdditionalYearlyAbs = rentAdditionalYearlyAbs; 
+            let currentAdditionalYearlyExpensesBuyerAbs = additionalYearlyExpensesBuyerAbs; 
+            let currentRentAdditionalYearlyExpensesAbs = rentAdditionalYearlyExpensesAbs; 
             let currentInvestmentDuring = investmentDuringFixedTerm;
             let currentInvestmentAfter = investmentAfterFixedTerm;
 
@@ -469,7 +469,7 @@
                 // --- 2. Owner Simulation ---
                 const yearlyFixed = (year <= fixedTermYears) ? fixedTermAbs : 0;
                 const ownerOtherPercentCost = currentHomeValue * otherYearlyPct;
-                const yearlyOther = currentOtherYearlyAbs + ownerOtherPercentCost;
+                const yearlyOther = currentAdditionalYearlyExpensesBuyerAbs + ownerOtherPercentCost;
                 const totalOwnerCosts = yearlyFixed + yearlyOther;
                 
                 const yearlyOwnerInvestment = (year <= fixedTermYears)
@@ -477,7 +477,7 @@
                     : currentInvestmentAfter;
 
                 // --- 3. Renter Simulation ---
-                const renterCost = currentRent + currentRentAdditionalYearlyAbs;
+                const renterCost = currentRent + currentRentAdditionalYearlyExpensesAbs;
                 const yearlySavings = totalOwnerCosts - renterCost;
                 
                 // --- 4. Apply Investments & Growth (Pre-Transaction State) ---
@@ -517,7 +517,7 @@
                     owner: {
                         costs: { 
                             fixed: yearlyFixed, 
-                            otherAbsolute: currentOtherYearlyAbs, 
+                            otherAbsolute: currentAdditionalYearlyExpensesBuyerAbs, 
                             otherPercent: ownerOtherPercentCost, 
                             total: totalOwnerCosts 
                         },
@@ -531,7 +531,7 @@
                     renter: {
                         costs: { 
                             rent: currentRent, 
-                            otherAbsolute: currentRentAdditionalYearlyAbs, 
+                            otherAbsolute: currentRentAdditionalYearlyExpensesAbs, 
                             total: renterCost 
                         },
                         investment: { 
@@ -573,11 +573,11 @@
                 }
 
                 // Inflate costs/investments for next loop
-                currentOtherYearlyAbs *= (1 + inflation);
+                currentAdditionalYearlyExpensesBuyerAbs *= (1 + inflation);
                 currentInvestmentDuring *= (1 + buyerInvestmentIncrease);
                 currentInvestmentAfter *= (1 + buyerInvestmentIncrease);
                 currentRent *= (1 + rentIncrease);
-                currentRentAdditionalYearlyAbs *= (1 + inflation);
+                currentRentAdditionalYearlyExpensesAbs *= (1 + inflation);
                 currentYearlyInvestmentRenter *= (1 + yearlyInvestmentIncreaseRenter);
             }
 
