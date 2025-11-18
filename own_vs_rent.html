@@ -75,13 +75,13 @@
                         </div>
                         
                         <div>
-                            <label for="int-purchase-yearly-deposit" class="block text-sm font-medium text-gray-300">Yearly Deposit during fixed term</label>
-                            <input type="number" id="int-purchase-yearly-deposit" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <label for="int-purchase-yearly-investment" class="block text-sm font-medium text-gray-300">Yearly Investment during fixed term</label>
+                            <input type="number" id="int-purchase-yearly-investment" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
-                            <label for="int-purchase-yearly-deposit-increase" class="block text-sm font-medium text-gray-300">Yearly Deposit Increase (%/year)</label>
-                            <input type="number" id="int-purchase-yearly-deposit-increase" value="3" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <label for="int-purchase-yearly-investment-increase" class="block text-sm font-medium text-gray-300">Yearly Investment Increase (%/year)</label>
+                            <input type="number" id="int-purchase-yearly-investment-increase" value="3" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
@@ -115,7 +115,7 @@
                         </div>
                         
                         <div>
-                            <label for="int-purchase-yearly-investment-after" class="block text-sm font-medium text-gray-300">Yearly Deposit after fixed term</label>
+                            <label for="int-purchase-yearly-investment-after" class="block text-sm font-medium text-gray-300">Yearly Investment after fixed term</label>
                             <input type="number" id="int-purchase-yearly-investment-after" value="30700" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
                     </div>
@@ -139,13 +139,13 @@
                         </div>
 
                         <div>
-                            <label for="int-rental-yearly-deposit" class="block text-sm font-medium text-gray-300">Yearly Deposit</label>
-                            <input type="number" id="int-rental-yearly-deposit" value="25000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <label for="int-rental-yearly-investment" class="block text-sm font-medium text-gray-300">Yearly Investment</label>
+                            <input type="number" id="int-rental-yearly-investment" value="25000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
-                            <label for="int-rental-yearly-deposit-increase" class="block text-sm font-medium text-gray-300">Yearly Deposit Increase (%/year)</label>
-                            <input type="number" id="int-rental-yearly-deposit-increase" value="3" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <label for="int-rental-yearly-investment-increase" class="block text-sm font-medium text-gray-300">Yearly Investment Increase (%/year)</label>
+                            <input type="number" id="int-rental-yearly-investment-increase" value="3" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
                     </div>
 
@@ -153,13 +153,13 @@
                         <h2 class="text-2xl font-semibold text-white border-b border-gray-700 pb-3">Investment Inputs</h2>
 
                         <div>
-                            <label for="int-initial-deposit-buyer" class="block text-sm font-medium text-gray-300">Initial Deposit (for Buyer)</label>
-                            <input type="number" id="int-initial-deposit-buyer" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <label for="int-initial-portfolio-value-buyer" class="block text-sm font-medium text-gray-300">Initial Portfolio Value (for Buyer)</label>
+                            <input type="number" id="int-initial-portfolio-value-buyer" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
-                            <label for="int-initial-deposit-renter" class="block text-sm font-medium text-gray-300">Initial Deposit (for Renter)</label>
-                            <input type="number" id="int-initial-deposit-renter" value="53000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <label for="int-initial-portfolio-value-renter" class="block text-sm font-medium text-gray-300">Initial Portfolio Value (for Renter)</label>
+                            <input type="number" id="int-initial-portfolio-value-renter" value="53000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
                         
                         <div>
@@ -302,29 +302,29 @@
             const rentIncrease = getVal('int-rent-increase') / 100;
             const rentAdditionalYearlyAbs = getVal('int-rent-additional-yearly-abs');
 
-            // --- Get Deposit/Investment Inputs ---
-            const initialDepositBuyer = getVal('int-initial-deposit-buyer');
-            const initialDepositRenter = getVal('int-initial-deposit-renter');
+            // --- Get Investment Inputs ---
+            const initialPortfolioValueBuyer = getVal('int-initial-portfolio-value-buyer');
+            const initialPortfolioValueRenter = getVal('int-initial-portfolio-value-renter');
 
-            const depositDuringFixedTerm = getVal('int-purchase-yearly-deposit');
-            const depositAfterFixedTerm = getVal('int-purchase-yearly-investment-after');
-            const buyerDepositIncrease = getVal('int-purchase-yearly-deposit-increase') / 100;
+            const investmentDuringFixedTerm = getVal('int-purchase-yearly-investment');
+            const investmentAfterFixedTerm = getVal('int-purchase-yearly-investment-after');
+            const buyerInvestmentIncrease = getVal('int-purchase-yearly-investment-increase') / 100;
             
-            let currentYearlyDepositRenter = getVal('int-rental-yearly-deposit');
-            const yearlyDepositIncreaseRenter = getVal('int-rental-yearly-deposit-increase') / 100;
+            let currentYearlyInvestmentRenter = getVal('int-rental-yearly-investment');
+            const yearlyInvestmentIncreaseRenter = getVal('int-rental-yearly-investment-increase') / 100;
 
             // --- Initial State (Year 0) ---
-            let ownerInvestmentPortfolio = initialDepositBuyer;
-            let ownerPortfolioBasis = initialDepositBuyer;
-            let renterInvestment = initialDepositRenter;
-            let renterPortfolioBasis = initialDepositRenter;
+            let ownerInvestmentPortfolio = initialPortfolioValueBuyer;
+            let ownerPortfolioBasis = initialPortfolioValueBuyer;
+            let renterInvestmentPortfolio = initialPortfolioValueRenter;
+            let renterPortfolioBasis = initialPortfolioValueRenter;
 
             // --- Simulation Setup (Tracking Variables) ---
             let currentHomeValue = homePrice;
             let currentOtherYearlyAbs = otherYearlyAbs; 
             let currentRentAdditionalYearlyAbs = rentAdditionalYearlyAbs; 
-            let currentDepositDuring = depositDuringFixedTerm;
-            let currentDepositAfter = depositAfterFixedTerm;
+            let currentInvestmentDuring = investmentDuringFixedTerm;
+            let currentInvestmentAfter = investmentAfterFixedTerm;
 
             // --- Simulation ---
             let ownerNetWorthHistory = [];
@@ -334,7 +334,7 @@
             // --- Year 0 Initial State ---
             const initialOwnerNetWorth = currentHomeValue + ownerInvestmentPortfolio;
             ownerNetWorthHistory.push(initialOwnerNetWorth); 
-            renterNetWorthHistory.push(renterInvestment);
+            renterNetWorthHistory.push(renterInvestmentPortfolio);
             
             yearByYearData.push({
                 year: 0,
@@ -347,8 +347,8 @@
                 },
                 renter: {
                     costs: { rent: 0, otherAbsolute: 0, total: 0 },
-                    investment: { deposit: 0, savings: 0, totalPortfolio: renterInvestment },
-                    netWorth: renterInvestment
+                    investment: { deposit: 0, savings: 0, totalPortfolio: renterInvestmentPortfolio },
+                    netWorth: renterInvestmentPortfolio
                 }
             });
 
@@ -363,19 +363,19 @@
                 const yearlyOther = currentOtherYearlyAbs + ownerOtherPercentCost;
                 const totalOwnerCosts = yearlyFixed + yearlyOther;
                 
-                const yearlyOwnerDeposit = (year <= fixedTermYears)
-                    ? currentDepositDuring
-                    : currentDepositAfter;
+                const yearlyOwnerInvestment = (year <= fixedTermYears)
+                    ? currentInvestmentDuring
+                    : currentInvestmentAfter;
 
                 // --- 3. Renter Simulation ---
                 const renterCost = currentRent + currentRentAdditionalYearlyAbs;
                 const yearlySavings = totalOwnerCosts - renterCost;
                 
                 // --- 4. Apply Investments & Growth (Pre-Transaction State) ---
-                let ownerPortfolioBeforeGrowth = ownerInvestmentPortfolio + yearlyOwnerDeposit;
+                let ownerPortfolioBeforeGrowth = ownerInvestmentPortfolio + yearlyOwnerInvestment;
                 let eoyOwnerPortfolio = ownerPortfolioBeforeGrowth * (1 + investmentRate);
                 
-                let renterPortfolioBeforeGrowth = renterInvestment + currentYearlyDepositRenter + yearlySavings;
+                let renterPortfolioBeforeGrowth = renterInvestmentPortfolio + currentYearlyInvestmentRenter + yearlySavings;
                 let eoyRenterPortfolio = renterPortfolioBeforeGrowth * (1 + investmentRate);
 
                 let eoyOwnerNetWorth = eoyHomeValue + eoyOwnerPortfolio;
@@ -413,7 +413,7 @@
                             total: totalOwnerCosts 
                         },
                         investment: { 
-                            deposit: yearlyOwnerDeposit, 
+                            deposit: yearlyOwnerInvestment, 
                             totalPortfolio: eoyOwnerPortfolio // Store EOY value
                         },
                         homeValue: eoyHomeValue, // Store EOY value
@@ -426,7 +426,7 @@
                             total: renterCost 
                         },
                         investment: { 
-                            deposit: currentYearlyDepositRenter, 
+                            deposit: currentYearlyInvestmentRenter, 
                             savings: yearlySavings, 
                             totalPortfolio: eoyRenterPortfolio // Store EOY value
                         },
@@ -454,22 +454,22 @@
                 // --- 7. Update tracking variables for NEXT year ---
                 currentHomeValue = eoyHomeValue; // Update for next loop
                 ownerInvestmentPortfolio = eoyOwnerPortfolio; // Update for next loop (includes end-term deduction)
-                renterInvestment = eoyRenterPortfolio; // Update for next loop 
+                renterInvestmentPortfolio = eoyRenterPortfolio; // Update for next loop 
 
                 // Update basis
-                ownerPortfolioBasis += yearlyOwnerDeposit;
-                renterPortfolioBasis += currentYearlyDepositRenter;
+                ownerPortfolioBasis += yearlyOwnerInvestment;
+                renterPortfolioBasis += currentYearlyInvestmentRenter;
                 if (yearlySavings > 0) {
                     renterPortfolioBasis += yearlySavings;
                 }
 
-                // Inflate costs/deposits for next loop
+                // Inflate costs/investments for next loop
                 currentOtherYearlyAbs *= (1 + inflation);
-                currentDepositDuring *= (1 + buyerDepositIncrease);
-                currentDepositAfter *= (1 + buyerDepositIncrease);
+                currentInvestmentDuring *= (1 + buyerInvestmentIncrease);
+                currentInvestmentAfter *= (1 + buyerInvestmentIncrease);
                 currentRent *= (1 + rentIncrease);
                 currentRentAdditionalYearlyAbs *= (1 + inflation);
-                currentYearlyDepositRenter *= (1 + yearlyDepositIncreaseRenter);
+                currentYearlyInvestmentRenter *= (1 + yearlyInvestmentIncreaseRenter);
             }
 
             // --- Final Calculations (Post-Simulation Transaction) ---
@@ -477,7 +477,7 @@
             // State at the end of the analysis period (after all yearly growth/expenses)
             const finalOwnerHomeValue = currentHomeValue;
             const finalOwnerPortfolio = ownerInvestmentPortfolio;
-            const finalRenterPortfolio = renterInvestment;
+            const finalRenterPortfolio = renterInvestmentPortfolio;
 
             // 1. Owner Home Sale Transaction
             const sellingCost = finalOwnerHomeValue * sellingCostsPct;
@@ -597,7 +597,7 @@
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Fixed Exp.</th>
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Other Exp.</th>
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Total Exp.</th>
-                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Deposit</th>
+                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Investment</th>
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Portfolio</th>
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Home Value</th>
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Net Worth</th>
@@ -605,7 +605,7 @@
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Rent</th>
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Other Exp.</th>
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Total Exp.</th>
-                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Deposit</th>
+                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Investment</th>
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Savings</th>
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Portfolio</th>
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Net Worth</th>
