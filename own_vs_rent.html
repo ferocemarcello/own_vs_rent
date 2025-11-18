@@ -70,7 +70,7 @@
                                         <li>The <strong>Home Value</strong> grows by the "Home Yearly Appreciation" rate.</li>
                                         <li>The <strong>Investment Portfolio</strong> grows by the "Investment Return" rate.</li>
                                         <li>Each year, the Owner adds their specified "Yearly Investment" to the portfolio.</li>
-                                        <li>Each year, the Owner's costs (Fixed Expenses, Other Expenses) are tracked.</li>
+                                        <li>Each year, the Owner's costs (Fixed Expenses, Additional Expenses) are tracked.</li>
                                     </ul>
                                 </li>
                                 <li><strong>For the Renter:</strong>
@@ -186,8 +186,8 @@
                         </div>
 
                         <div>
-                            <label for="int-other-yearly-pct" class="block text-sm font-medium text-gray-300">Other Yearly Expenses (% of Home Value)</label>
-                            <input type="number" id="int-other-yearly-pct" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <label for="int-additional-yearly-pct-purchase" class="block text-sm font-medium text-gray-300">Additional Yearly Expenses (% of Home Value)</label>
+                            <input type="number" id="int-additional-yearly-pct-purchase" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
@@ -400,7 +400,7 @@
             const fixedTermAbs = getVal('int-fixed-term-abs');
             const fixedTermYears = getVal('int-fixed-term-years');
             const additionalYearlyExpensesBuyerAbs = getVal('int-additional-yearly-expenses-buyer');
-            const otherYearlyPct = getVal('int-other-yearly-pct') / 100;
+            const additionalYearlyPctPurchase = getVal('int-additional-yearly-pct-purchase') / 100;
             const appreciation = getVal('int-home-appreciation') / 100;
             const endTermPct = getVal('int-end-term-pct') / 100;
             const endTermAbs = getVal('int-end-term-abs');
@@ -430,7 +430,7 @@
 
             // --- Simulation Setup (Tracking Variables) ---
             let currentHomeValue = homePrice;
-            let currentAdditionalYearlyExpensesBuyerAbs = additionalYearlyExpensesBuyerAbs; 
+            let currentAdditionalYearlyExpensesPurchaseAbs = additionalYearlyExpensesBuyerAbs; 
             let currentRentAdditionalYearlyExpensesAbs = rentAdditionalYearlyExpensesAbs; 
             let currentInvestmentDuring = investmentDuringFixedTerm;
             let currentInvestmentAfter = investmentAfterFixedTerm;
@@ -449,13 +449,13 @@
                 year: 0,
                 type: 'Yearly',
                 owner: {
-                    costs: { fixed: 0, otherAbsolute: 0, otherPercent: 0, total: 0 },
+                    costs: { fixed: 0, additionalAbsolute: 0, additionalPercent: 0, total: 0 },
                     investment: { deposit: 0, totalPortfolio: ownerInvestmentPortfolio },
                     homeValue: currentHomeValue,
                     netWorth: initialOwnerNetWorth
                 },
                 renter: {
-                    costs: { rent: 0, otherAbsolute: 0, total: 0 },
+                    costs: { rent: 0, additionalAbsolute: 0, total: 0 },
                     investment: { deposit: 0, savings: 0, totalPortfolio: renterInvestmentPortfolio },
                     netWorth: renterInvestmentPortfolio
                 }
@@ -468,9 +468,9 @@
 
                 // --- 2. Owner Simulation ---
                 const yearlyFixed = (year <= fixedTermYears) ? fixedTermAbs : 0;
-                const ownerOtherPercentCost = currentHomeValue * otherYearlyPct;
-                const yearlyOther = currentAdditionalYearlyExpensesBuyerAbs + ownerOtherPercentCost;
-                const totalOwnerCosts = yearlyFixed + yearlyOther;
+                const additionalPercentCostPurchase = currentHomeValue * additionalYearlyPctPurchase;
+                const yearlyAdditionalPurchase = currentAdditionalYearlyExpensesPurchaseAbs + additionalPercentCostPurchase;
+                const totalOwnerCosts = yearlyFixed + yearlyAdditionalPurchase;
                 
                 const yearlyOwnerInvestment = (year <= fixedTermYears)
                     ? currentInvestmentDuring
@@ -517,8 +517,8 @@
                     owner: {
                         costs: { 
                             fixed: yearlyFixed, 
-                            otherAbsolute: currentAdditionalYearlyExpensesBuyerAbs, 
-                            otherPercent: ownerOtherPercentCost, 
+                            additionalAbsolute: currentAdditionalYearlyExpensesPurchaseAbs, 
+                            additionalPercent: additionalPercentCostPurchase, 
                             total: totalOwnerCosts 
                         },
                         investment: { 
@@ -531,7 +531,7 @@
                     renter: {
                         costs: { 
                             rent: currentRent, 
-                            otherAbsolute: currentRentAdditionalYearlyExpensesAbs, 
+                            additionalAbsolute: currentRentAdditionalYearlyExpensesAbs, 
                             total: renterCost 
                         },
                         investment: { 
@@ -573,7 +573,7 @@
                 }
 
                 // Inflate costs/investments for next loop
-                currentAdditionalYearlyExpensesBuyerAbs *= (1 + inflation);
+                currentAdditionalYearlyExpensesPurchaseAbs *= (1 + inflation);
                 currentInvestmentDuring *= (1 + buyerInvestmentIncrease);
                 currentInvestmentAfter *= (1 + buyerInvestmentIncrease);
                 currentRent *= (1 + rentIncrease);
@@ -704,7 +704,7 @@
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Year</th>
                             
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Fixed Exp.</th>
-                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Other Exp.</th>
+                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Additional Exp.</th>
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Total Exp.</th>
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Investment</th>
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Portfolio</th>
@@ -712,7 +712,7 @@
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Net Worth</th>
                             
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Rent</th>
-                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Other Exp.</th>
+                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Additional Exp.</th>
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Total Exp.</th>
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Investment</th>
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Savings</th>
@@ -843,15 +843,15 @@
                     // Standard Yearly Row
                     const o = yearData.owner;
                     const r = yearData.renter;
-                    const ownerOtherTotal = o.costs.otherAbsolute + o.costs.otherPercent;
-                    const renterOtherTotal = r.costs.otherAbsolute;
+                    const ownerAdditionalTotal = o.costs.additionalAbsolute + o.costs.additionalPercent;
+                    const renterAdditionalTotal = r.costs.additionalAbsolute;
 
                     tableHTML += `
                         <tr>
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-medium text-white">${year}</td>
                             
                             <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(o.costs.fixed)}</td>
-                            <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(ownerOtherTotal)}</td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(ownerAdditionalTotal)}</td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300 font-medium">${formatCurrency(o.costs.total)}</td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(o.investment.deposit)}</td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300 font-bold">${formatCurrency(o.investment.totalPortfolio)}</td>
@@ -859,7 +859,7 @@
                             <td class="whitespace-nowrap py-4 px-3 text-sm text-cyan-400 font-bold">${formatCurrency(o.netWorth)}</td>
                             
                             <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(r.costs.rent)}</td>
-                            <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(renterOtherTotal)}</td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(renterAdditionalTotal)}</td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300 font-medium">${formatCurrency(r.costs.total)}</td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(r.investment.deposit)}</td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(r.investment.savings)}</td>
