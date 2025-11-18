@@ -479,13 +479,15 @@
 
                 // --- 3. Renter Simulation ---
                 const renterCost = currentRent + currentRentAdditionalYearlyExpensesAbs;
-                const yearlySavings = totalOwnerCosts - renterCost;
+                // Calculate savings for table display, but do NOT add to portfolio
+                const yearlySavings = totalOwnerCosts - renterCost; 
                 
                 // --- 4. Apply Investments & Growth (Pre-Transaction State) ---
                 let ownerPortfolioBeforeGrowth = ownerInvestmentPortfolio + yearlyOwnerInvestment;
                 let eoyOwnerPortfolio = ownerPortfolioBeforeGrowth * (1 + investmentRate);
                 
-                let renterPortfolioBeforeGrowth = renterInvestmentPortfolio + currentYearlyInvestmentRenter + yearlySavings;
+                // FIX APPLIED: Only include explicit Renter investment, NOT yearlySavings
+                let renterPortfolioBeforeGrowth = renterInvestmentPortfolio + currentYearlyInvestmentRenter; 
                 let eoyRenterPortfolio = renterPortfolioBeforeGrowth * (1 + investmentRate);
 
                 let eoyOwnerNetWorth = currentHomeValue + eoyOwnerPortfolio;
@@ -537,7 +539,7 @@
                         },
                         investment: { 
                             deposit: currentYearlyInvestmentRenter, 
-                            savings: yearlySavings, 
+                            savings: yearlySavings, // Savings still logged here for reference
                             totalPortfolio: eoyRenterPortfolio // Store EOY value
                         },
                         netWorth: eoyRenterNetWorth
@@ -567,10 +569,9 @@
 
                 // Update basis
                 ownerPortfolioBasis += yearlyOwnerInvestment;
+                // FIX APPLIED: Only include explicit Renter investment in basis
                 renterPortfolioBasis += currentYearlyInvestmentRenter;
-                if (yearlySavings > 0) {
-                    renterPortfolioBasis += yearlySavings;
-                }
+                
 
                 // Inflate costs/investments for next loop
                 currentAdditionalYearlyExpensesPurchaseAbs *= (1 + inflation);
@@ -703,21 +704,21 @@
                         <tr>
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Year</th>
                             
-                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Fixed Exp.</th>
-                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Additional Exp.</th>
-                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Total Exp.</th>
-                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Investment</th>
-                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Portfolio</th>
-                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Home Value</th>
-                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Net Worth</th>
+                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Fixed Exp. (During Year)</th>
+                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Additional Exp. (During Year)</th>
+                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Total Exp. (During Year)</th>
+                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Yearly Investment (At Year Start)</th>
+                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Portfolio (At year end)</th>
+                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Home Value (At year end)</th>
+                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Net Worth (At year end)</th>
                             
-                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Rent</th>
-                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Additional Exp.</th>
-                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Total Exp.</th>
-                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Investment</th>
-                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Savings</th>
-                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Portfolio</th>
-                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Net Worth</th>
+                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Rent (During Year)</th>
+                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Additional Exp. (During Year)</th>
+                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Total Exp. (During Year)</th>
+                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Yearly Investment (At Year Start)</th>
+                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Savings (vs. Owner Cost)</th>
+                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Portfolio (At year end)</th>
+                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Net Worth (At year end)</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-700 bg-gray-900">
@@ -804,7 +805,7 @@
                             <td colspan="7" class="py-4 px-3 text-sm font-semibold text-gray-400"></td>
                         </tr>
                         <tr class="bg-gray-700 border-b-2 border-green-500">
-                            <td class="whitespace-nowwraph py-4 px-3 text-sm font-bold text-green-300"></td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-green-300"></td>
                             <td colspan="7" class="py-2 px-3 text-sm font-semibold text-white">
                                 <div class="p-2 bg-gray-800 rounded-lg border border-cyan-500/50">
                                     <p class="font-bold text-cyan-300 mb-1">OWNER PORTFOLIO LIQUIDATION (${capGainsTaxForTable}% CGT)</p>
@@ -859,7 +860,7 @@
                             <td class="whitespace-nowrap py-4 px-3 text-sm text-cyan-400 font-bold">${formatCurrency(o.netWorth)}</td>
                             
                             <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(r.costs.rent)}</td>
-                            <td classsearch-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(renterAdditionalTotal)}</td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(renterAdditionalTotal)}</td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300 font-medium">${formatCurrency(r.costs.total)}</td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(r.investment.deposit)}</td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(r.investment.savings)}</td>
