@@ -201,8 +201,8 @@
                         </div>
 
                         <div>
-                            <label for="int-end-term-abs" class="block text-sm font-medium text-gray-300">Expenses at End of Term (Absolute)</label>
-                            <input type="number" id="int-end-term-abs" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <label for="int-end-term-expenses-abs" class="block text-sm font-medium text-gray-300">Expenses at End of Term (Absolute)</label>
+                            <input type="number" id="int-end-term-expenses-abs" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
                         
                         <div>
@@ -403,7 +403,7 @@
             const additionalYearlyPctPurchase = getVal('int-additional-yearly-pct-purchase') / 100;
             const appreciation = getVal('int-home-appreciation') / 100;
             const endTermPct = getVal('int-end-term-pct') / 100;
-            const endTermAbs = getVal('int-end-term-abs');
+            const endTermExpensesAbs = getVal('int-end-term-expenses-abs');
             const sellingCostsPct = getVal('int-selling-costs-pct') / 100;
 
             // --- Get Renter Inputs ---
@@ -496,7 +496,7 @@
                 let ownerNetWorthBeforeEndTerm = eoyOwnerNetWorth;
 
                 if (year === fixedTermYears && fixedTermYears > 0) {
-                    endTermTransactionCost = (eoyHomeValue * endTermPct) + endTermAbs;
+                    endTermTransactionCost = (eoyHomeValue * endTermPct) + endTermExpensesAbs;
                     
                     // Deduct from portfolio and net worth
                     eoyOwnerPortfolio -= endTermTransactionCost;
@@ -694,7 +694,7 @@
             
             const sellingCostsPctForTable = getVal('int-selling-costs-pct'); 
             const endTermPctForTable = getVal('int-end-term-pct');
-            const endTermAbsForTable = getVal('int-end-term-abs');
+            const endTermExpensesAbsForTable = getVal('int-end-term-expenses-abs');
             const capGainsTaxForTable = getVal('int-cap-gains-tax');
 
             let tableHTML = `
@@ -732,7 +732,7 @@
                     const homeValueAtTermEnd = o.homeValueAtTermEnd; 
                     
                     const pctExpenseAmount = homeValueAtTermEnd * (endTermPctForTable / 100);
-                    const absExpenseAmount = endTermAbsForTable; 
+                    const absExpenseAmount = endTermExpensesAbsForTable; 
                     
                     // End-of-Term Expense Row - Detailed Transaction Summary
                     tableHTML += `
