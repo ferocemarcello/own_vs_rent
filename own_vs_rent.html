@@ -464,7 +464,7 @@
 
             for (let year = 1; year <= years; year++) {
                 // --- 1. Store Start-of-Year values for EOY calculation ---
-                const eoyHomeValue = currentHomeValue * (1 + appreciation);
+                currentHomeValue = currentHomeValue * (1 + appreciation);
 
                 // --- 2. Owner Simulation ---
                 const yearlyFixed = (year <= fixedTermYears) ? fixedTermAbs : 0;
@@ -487,7 +487,7 @@
                 let renterPortfolioBeforeGrowth = renterInvestmentPortfolio + currentYearlyInvestmentRenter + yearlySavings;
                 let eoyRenterPortfolio = renterPortfolioBeforeGrowth * (1 + investmentRate);
 
-                let eoyOwnerNetWorth = eoyHomeValue + eoyOwnerPortfolio;
+                let eoyOwnerNetWorth = currentHomeValue + eoyOwnerPortfolio;
                 const eoyRenterNetWorth = eoyRenterPortfolio;
 
                 
@@ -496,7 +496,7 @@
                 let ownerNetWorthBeforeEndTerm = eoyOwnerNetWorth;
 
                 if (year === fixedTermYears && fixedTermYears > 0) {
-                    endTermTransactionCost = (eoyHomeValue * endTermPct) + endTermExpensesAbs;
+                    endTermTransactionCost = (currentHomeValue * endTermPct) + endTermExpensesAbs;
                     
                     // Deduct from portfolio and net worth
                     eoyOwnerPortfolio -= endTermTransactionCost;
@@ -525,7 +525,7 @@
                             deposit: yearlyOwnerInvestment, 
                             totalPortfolio: eoyOwnerPortfolio // Store EOY value
                         },
-                        homeValue: eoyHomeValue, // Store EOY value
+                        homeValue: currentHomeValue, // Store EOY value
                         netWorth: eoyOwnerNetWorth
                     },
                     renter: {
@@ -552,7 +552,7 @@
                             endTermCost: endTermTransactionCost,
                             netWorthAfter: eoyOwnerNetWorth,
                             netWorthBefore: ownerNetWorthBeforeEndTerm, // Pass pre-deduction value
-                            homeValueAtTermEnd: eoyHomeValue // Pass Home Value for breakdown
+                            homeValueAtTermEnd: currentHomeValue // Pass Home Value for breakdown
                         },
                         renter: {
                             netWorthAfter: eoyRenterNetWorth
@@ -561,7 +561,6 @@
                 }
 
                 // --- 7. Update tracking variables for NEXT year ---
-                currentHomeValue = eoyHomeValue; // Update for next loop
                 ownerInvestmentPortfolio = eoyOwnerPortfolio; // Update for next loop (includes end-term deduction)
                 renterInvestmentPortfolio = eoyRenterPortfolio; // Update for next loop 
 
