@@ -457,12 +457,14 @@
                     costs: { fixed: 0, additionalAbsolute: 0, additionalPercent: 0, total: 0 },
                     investment: { deposit: 0, totalPortfolio: ownerInvestmentPortfolio },
                     homeValue: currentHomeValue,
-                    netWorth: initialOwnerNetWorth
+                    netWorth: initialOwnerNetWorth,
+                    cashOut: 0 // New field for Year 0
                 },
                 renter: {
                     costs: { rent: 0, additionalAbsolute: 0, total: 0 },
                     investment: { deposit: 0, totalPortfolio: renterInvestmentPortfolio },
-                    netWorth: renterInvestmentPortfolio
+                    netWorth: renterInvestmentPortfolio,
+                    cashOut: 0 // New field for Year 0
                 }
             });
 
@@ -480,18 +482,25 @@
                 const yearlyOwnerInvestment = (year <= fixedTermYears)
                     ? currentInvestmentDuring
                     : currentInvestmentAfter;
+                
+                // NEW: Owner Cash-Out (Expenses + Investment)
+                const ownerCashOut = totalOwnerCosts + yearlyOwnerInvestment;
+
 
                 // --- 3. Renter Simulation ---
                 const renterCost = currentRent + currentRentAdditionalYearlyExpensesAbs;
                 
                 // IMPORTANT: Calculate savings for reference, but DO NOT use in portfolio logic
-                const yearlySavings = totalOwnerCosts - renterCost; 
+                // const yearlySavings = totalOwnerCosts - renterCost; // (Ignored as requested)
+                
+                // NEW: Renter Cash-Out (Expenses + Investment)
+                const renterCashOut = renterCost + currentYearlyInvestmentRenter;
                 
                 // --- 4. Apply Investments & Growth (Pre-Transaction State) ---
                 let ownerPortfolioBeforeGrowth = ownerInvestmentPortfolio + yearlyOwnerInvestment;
                 let eoyOwnerPortfolio = ownerPortfolioBeforeGrowth * (1 + investmentRate);
                 
-                // *** FIXED: Renter portfolio now ONLY includes base investment (yearlySavings ignored) ***
+                // *** Renter portfolio now ONLY includes base investment (yearlySavings ignored) ***
                 let renterPortfolioBeforeGrowth = renterInvestmentPortfolio + currentYearlyInvestmentRenter; 
                 let eoyRenterPortfolio = renterPortfolioBeforeGrowth * (1 + investmentRate);
 
@@ -535,6 +544,7 @@
                             deposit: yearlyOwnerInvestment, 
                             totalPortfolio: eoyOwnerPortfolio // Store EOY value
                         },
+                        cashOut: ownerCashOut, // NEW FIELD
                         homeValue: currentHomeValue, // Store EOY value
                         netWorth: eoyOwnerNetWorth
                     },
@@ -546,9 +556,9 @@
                         },
                         investment: { 
                             deposit: currentYearlyInvestmentRenter, 
-                            // Removed: savings: yearlySavings, 
                             totalPortfolio: eoyRenterPortfolio // Store EOY value
                         },
+                        cashOut: renterCashOut, // NEW FIELD
                         netWorth: eoyRenterNetWorth
                     }
                 });
@@ -576,7 +586,7 @@
 
                 // Update basis
                 ownerPortfolioBasis += yearlyOwnerInvestment;
-                // *** FIXED: Renter basis now ONLY includes base investment (yearlySavings ignored) ***
+                // Renter basis now ONLY includes base investment (yearlySavings ignored)
                 renterPortfolioBasis += currentYearlyInvestmentRenter;
                 
 
@@ -725,7 +735,7 @@
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Fixed Exp. (During Year)</th>
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Additional Exp. (During Year)</th>
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Total Exp. (During Year)</th>
-                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Yearly Investment (At Year Start)</th>
+                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner cash-out (During Year)</th> <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Yearly Investment (At Year Start)</th>
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Portfolio (At year end)</th>
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Home Value (At year end)</th>
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-cyan-400 uppercase tracking-wider">Owner Net Worth (At year end)</th>
@@ -733,7 +743,7 @@
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Rent (During Year)</th>
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Additional Exp. (During Year)</th>
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Total Exp. (During Year)</th>
-                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Yearly Investment (At Year Start)</th>
+                            <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter cash-out (During Year)</th> <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Yearly Investment (At Year Start)</th>
                             
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Portfolio (At year end)</th>
                             <th scope="col" class="py-3.5 px-3 text-left text-xs font-semibold text-lime-400 uppercase tracking-wider">Renter Net Worth (At year end)</th>
@@ -754,10 +764,10 @@
                     const absExpenseAmount = endTermExpensesAbsForTable; 
                     
                     // End-of-Term Expense Row - Detailed Transaction Summary
-                    // Colspan reduced from 15 to 14
+                    // Colspan updated from 14 to 16
                     tableHTML += `
                         <tr class="bg-gray-700 border-t-2 border-yellow-500 border-b-2 border-yellow-500">
-                            <td colspan="14" class="py-4 px-3 text-sm text-center">
+                            <td colspan="16" class="py-4 px-3 text-sm text-center">
                                 <span class="font-bold text-xl text-yellow-300 block mb-4">YEAR ${year} END OF FIXED TERM EXPENSE TRANSACTION</span>
                                 
                                 <div class="grid grid-cols-4 gap-4 items-center bg-gray-800 p-4 rounded-lg">
@@ -789,57 +799,57 @@
                     const r = yearData.renter;
                     
                     // Final Sale/Liquidation Transaction Summary
-                    // Colspan reduced from 15 to 14
+                    // Colspan updated from 14 to 16
                     tableHTML += `
                         <tr class="bg-gray-700 border-t-4 border-white">
-                            <td colspan="14" class="py-4 px-3 text-sm text-center">
+                            <td colspan="16" class="py-4 px-3 text-sm text-center">
                                 <span class="font-bold text-xl text-white block mb-4">YEAR ${year} FINAL SALE & PORTFOLIO LIQUIDATION</span>
                             </td>
                         </tr>
                         <tr class="bg-gray-700">
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-cyan-300"></td>
-                            <td colspan="6" class="py-4 px-3 text-sm font-semibold text-gray-400 text-right"> HOME SALE PROCEEDS: Sale Price - Selling Costs (${sellingCostsPctForTable.toFixed(1)}%)</td>
+                            <td colspan="8" class="py-4 px-3 text-sm font-semibold text-gray-400 text-right"> HOME SALE PROCEEDS: Sale Price - Selling Costs (${sellingCostsPctForTable.toFixed(1)}%)</td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-cyan-400">${formatCurrency(o.salePrice)} - ${formatCurrency(o.sellingCost)} = ${formatCurrency(o.salePrice - o.sellingCost)}</td>
                             
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-lime-300"></td>
-                            <td colspan="3" class="py-4 px-3 text-sm font-semibold text-gray-400 text-right"> RENTER PORTFOLIO VALUE (Before Tax):</td>
-                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-lime-400" colspan="2">${formatCurrency(r.portfolio)}</td>
+                            <td colspan="4" class="py-4 px-3 text-sm font-semibold text-gray-400 text-right"> RENTER PORTFOLIO VALUE (Before Tax):</td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-lime-400">${formatCurrency(r.portfolio)}</td>
                         </tr>
                         <tr class="bg-gray-700">
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-cyan-300"></td>
-                            <td colspan="6" class="py-4 px-3 text-sm font-semibold text-gray-400 text-right"> OWNER PORTFOLIO VALUE (Before Tax):</td>
+                            <td colspan="8" class="py-4 px-3 text-sm font-semibold text-gray-400 text-right"> OWNER PORTFOLIO VALUE (Before Tax):</td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-cyan-400">${formatCurrency(o.ownerPortfolio)}</td>
 
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-lime-300"></td>
-                            <td colspan="3" class="py-4 px-3 text-sm font-semibold text-gray-400 text-right"> RENTER PORTFOLIO BASIS:</td>
-                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-lime-400" colspan="2">${formatCurrency(r.renterPortfolioBasis)}</td>
+                            <td colspan="4" class="py-4 px-3 text-sm font-semibold text-gray-400 text-right"> RENTER PORTFOLIO BASIS:</td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-lime-400">${formatCurrency(r.renterPortfolioBasis)}</td>
                         </tr>
                         <tr class="bg-gray-700">
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-cyan-300"></td>
-                            <td colspan="6" class="py-4 px-3 text-sm font-semibold text-gray-400 text-right"> OWNER PORTFOLIO BASIS:</td>
+                            <td colspan="8" class="py-4 px-3 text-sm font-semibold text-gray-400 text-right"> OWNER PORTFOLIO BASIS:</td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-cyan-400">${formatCurrency(o.ownerPortfolioBasis)}</td>
                             
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-lime-300"></td>
-                            <td colspan="3" class="py-4 px-3 text-sm font-semibold text-gray-400 text-right"> RENTER PORTFOLIO GAINS:</td>
-                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-lime-400" colspan="2">${formatCurrency(r.renterGains)}</td>
+                            <td colspan="4" class="py-4 px-3 text-sm font-semibold text-gray-400 text-right"> RENTER PORTFOLIO GAINS:</td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-lime-400">${formatCurrency(r.renterGains)}</td>
                         </tr>
                         <tr class="bg-gray-700">
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-cyan-300"></td>
-                            <td colspan="6" class="py-4 px-3 text-sm font-semibold text-gray-400 text-right"> OWNER PORTFOLIO GAINS:</td>
+                            <td colspan="8" class="py-4 px-3 text-sm font-semibold text-gray-400 text-right"> OWNER PORTFOLIO GAINS:</td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-cyan-400">${formatCurrency(o.ownerPortfolioGains)}</td>
                             
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-lime-300"></td>
-                            <td colspan="3" class="py-4 px-3 text-sm font-semibold text-gray-400 text-right"> CAPITAL GAINS TAX (${capGainsTaxForTable.toFixed(1)}% of Gains):</td>
-                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-red-400" colspan="2">-${formatCurrency(r.renterTax)}</td>
+                            <td colspan="4" class="py-4 px-3 text-sm font-semibold text-gray-400 text-right"> CAPITAL GAINS TAX (${capGainsTaxForTable.toFixed(1)}% of Gains):</td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-red-400">-${formatCurrency(r.renterTax)}</td>
                         </tr>
                         <tr class="bg-gray-700 border-b-4 border-cyan-500 border-lime-500">
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-white"></td>
-                            <td colspan="6" class="py-4 px-3 text-lg font-bold text-white text-right"> FINAL OWNER NET WORTH:</td>
+                            <td colspan="8" class="py-4 px-3 text-lg font-bold text-white text-right"> FINAL OWNER NET WORTH:</td>
                             <td class="whitespace-nowrap py-4 px-3 text-lg font-bold text-cyan-400">${formatCurrency(o.finalNetWorth)}</td>
                             
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-white"></td>
-                            <td colspan="3" class="py-4 px-3 text-lg font-bold text-white text-right"> FINAL RENTER NET WORTH:</td>
-                            <td class="whitespace-nowrap py-4 px-3 text-lg font-bold text-lime-400" colspan="2">${formatCurrency(r.finalNetWorth)}</td>
+                            <td colspan="4" class="py-4 px-3 text-lg font-bold text-white text-right"> FINAL RENTER NET WORTH:</td>
+                            <td class="whitespace-nowrap py-4 px-3 text-lg font-bold text-lime-400">${formatCurrency(r.finalNetWorth)}</td>
                         </tr>
                     `;
                 } else { // Yearly Data Row
@@ -854,7 +864,7 @@
                             <td class="whitespace-nowrap py-4 px-3 text-sm text-cyan-300">${formatCurrency(o.costs.fixed)}</td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm text-cyan-300">${formatCurrency(o.costs.additionalAbsolute + o.costs.additionalPercent)}</td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm text-cyan-300">${formatCurrency(o.costs.total)}</td>
-                            <td class="whitespace-nowrap py-4 px-3 text-sm font-medium text-cyan-400">${formatCurrency(o.investment.deposit)}</td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-cyan-500">${formatCurrency(o.cashOut)}</td> <td class="whitespace-nowrap py-4 px-3 text-sm font-medium text-cyan-400">${formatCurrency(o.investment.deposit)}</td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-cyan-400">${formatCurrency(o.investment.totalPortfolio)}</td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm text-cyan-400">${formatCurrency(o.homeValue)}</td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-cyan-400">${formatCurrency(o.netWorth)}</td>
@@ -862,7 +872,7 @@
                             <td class="whitespace-nowrap py-4 px-3 text-sm text-lime-300">${formatCurrency(r.costs.rent)}</td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm text-lime-300">${formatCurrency(r.costs.additionalAbsolute)}</td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm text-lime-300">${formatCurrency(r.costs.total)}</td>
-                            <td class="whitespace-nowrap py-4 px-3 text-sm font-medium text-lime-400">${formatCurrency(r.investment.deposit)}</td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-lime-500">${formatCurrency(r.cashOut)}</td> <td class="whitespace-nowrap py-4 px-3 text-sm font-medium text-lime-400">${formatCurrency(r.investment.deposit)}</td>
                             
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-lime-400">${formatCurrency(r.investment.totalPortfolio)}</td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-lime-400">${formatCurrency(r.netWorth)}</td>
@@ -872,10 +882,10 @@
                 
                 // Breakeven Row Insertion (after the year data)
                 if (breakevenYear && year === breakevenYear) {
-                    // Colspan reduced from 15 to 14
+                    // Colspan updated from 14 to 16
                     tableHTML += `
                         <tr class="bg-lime-900/50 border-t-2 border-lime-500 border-b-2 border-lime-500">
-                            <td colspan="14" class="py-3 px-3 text-lg font-bold text-center text-lime-300">
+                            <td colspan="16" class="py-3 px-3 text-lg font-bold text-center text-lime-300">
                                 🟢 AT THE END OF YEAR ${year}, THE RENTER'S NET WORTH HAS EQUALED OR SURPASSED THE OWNER'S NET WORTH.
                             </td>
                         </tr>
