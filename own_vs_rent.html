@@ -279,33 +279,34 @@
             </button>
         </div>
 
-        <div id="results-section" class="mt-10 bg-gray-800 p-6 rounded-xl shadow-lg hidden">
-            <h2 class="text-2xl font-semibold text-white mb-6 text-center">Results after <span id="results-years">10</span> Years</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center mb-8">
-                <div>
-                    <div class="text-sm text-gray-400">Owner's Net Worth</div>
-                    <div id="owner-net-worth" class="text-3xl font-bold text-cyan-400"></div>
-                </div>
-                <div>
-                    <div class="text-sm text-gray-400">Renter's Net Worth</div>
-                    <div id="renter-net-worth" class="text-3xl font-bold text-lime-400"></div>
-                </div>
-                <div>
-                    <div class="text-sm text-gray-400">Net Benefit of <span id="winner"></span></div>
-                    <div id="net-benefit" class="text-3xl font-bold text-white"></div>
-                </div>
-            </div>
+        </div>
 
+    <div id="results-section" class="mt-10 bg-gray-800 p-6 rounded-xl shadow-lg hidden">
+        <h2 class="text-2xl font-semibold text-white mb-6 text-center">Results after <span id="results-years">10</span> Years</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center mb-8">
             <div>
-                <canvas id="comparison-chart"></canvas>
+                <div class="text-sm text-gray-400">Owner's Net Worth</div>
+                <div id="owner-net-worth" class="text-3xl font-bold text-cyan-400"></div>
             </div>
+            <div>
+                <div class="text-sm text-gray-400">Renter's Net Worth</div>
+                <div id="renter-net-worth" class="text-3xl font-bold text-lime-400"></div>
+            </div>
+            <div>
+                <div class="text-sm text-gray-400">Net Benefit of <span id="winner"></span></div>
+                <div id="net-benefit" class="text-3xl font-bold text-white"></div>
+            </div>
+        </div>
 
-            <div class="mt-10 overflow-x-auto">
-                <h3 class="text-xl font-semibold text-white mb-4 text-center">Year-by-Year Breakdown</h3>
-                <div id="results-table-container">
-                    </div>
-            </div>
+        <div>
+            <canvas id="comparison-chart"></canvas>
+        </div>
+
+        <div class="mt-10 overflow-x-auto">
+            <h3 class="text-xl font-semibold text-white mb-4 text-center">Year-by-Year Breakdown</h3>
+            <div id="results-table-container">
+                </div>
         </div>
     </div>
 
@@ -858,7 +859,7 @@
                             <td class="whitespace-nowrap py-4 px-3 text-sm text-cyan-400 font-bold">${formatCurrency(o.netWorth)}</td>
                             
                             <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(r.costs.rent)}</td>
-                            <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(renterAdditionalTotal)}</td>
+                            <td classsearch-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(renterAdditionalTotal)}</td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300 font-medium">${formatCurrency(r.costs.total)}</td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(r.investment.deposit)}</td>
                             <td class="whitespace-nowrap py-4 px-3 text-sm text-gray-300">${formatCurrency(r.investment.savings)}</td>
