@@ -84,6 +84,44 @@
                                 These costs are still tracked in the "Total Expenses" graph and the new "Cost Summary" panel to show the true cost of ownership, but they do not negatively impact the final asset value.
                             </p>
                         </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-white mb-2">Key Input Fields Explained</h3>
+                            
+                            <h4 class="text-lg font-semibold text-gray-200 mt-4 mb-1">General</h4>
+                            <ul class="list-disc list-inside pl-4 space-y-1">
+                                <li><strong>Analysis Period (Years):</strong> How many years to run the simulation for.</li>
+                                <li><strong>Yearly Inflation (%):</strong> Affects "Additional Yearly Expenses" for both Owner and Renter, increasing them each year.</li>
+                            </ul>
+                
+                            <h4 class="text-lg font-semibold text-gray-200 mt-4 mb-1">Purchase Inputs (Owner)</h4>
+                            <ul class="list-disc list-inside pl-4 space-y-1">
+                                <li><strong>Home Initial Price:</strong> The purchase price of the home.</li>
+                                <li><strong>Initial Costs (% and Absolute):</strong> One-time fees for buying. <em>Note: In the current version of the calculator, these fields are calculated but not deducted from the owner's portfolio or used in the final net worth calculation.</em></li>
+                                <li><strong>Yearly Expenses with Fixed Term (Absolute):</strong> A fixed yearly cost, typically a mortgage (principal + interest).</li>
+                                <li><strong>Years for Fixed Term Expenses:</strong> Duration of the fixed expense (e.g., 20-year mortgage term).</li>
+                                <li><strong>Yearly Investment during fixed term:</strong> Yearly amount the Owner invests while paying the fixed expense.</li>
+                                <li><strong>Additional Yearly Expenses (Absolute / %):</strong> Ongoing costs of ownership (property tax, maintenance, insurance). The absolute part increases every year with inflation.</li>
+                                <li><strong>Home Yearly Appreciation (%):</strong> Yearly increase in the home's value.</li>
+                                <li><strong>Expenses at End of Term (% / Absolute):</strong> A one-time fee paid from the Owner's portfolio when the "Fixed Term" ends (e.g., refinancing fee).</li>
+                                <li><strong>Selling Costs (% of Final Price):</strong> Costs paid when the house is sold at the end of the analysis period.</li>
+                                <li><strong>Yearly Investment after fixed term:</strong> Yearly amount the Owner invests after the fixed expense (mortgage) is paid off.</li>
+                            </ul>
+                
+                            <h4 class="text-lg font-semibold text-gray-200 mt-4 mb-1">Rental Inputs (Renter)</h4>
+                            <ul class="list-disc list-inside pl-4 space-y-1">
+                                <li><strong>Yearly Rent (Absolute):</strong> Starting yearly rent.</li>
+                                <li><strong>Rent Increase (%/year):</strong> Rent increase every year.</li>
+                                <li><strong>Additional Yearly Expenses (Absolute):</strong> Other rental costs (e.g., utilities, ordinary mantainance), which increase with inflation.</li>
+                                <li><strong>Yearly Investment:</strong> Amount the Renter invests each year.</li>
+                            </ul>
+                
+                            <h4 class="text-lg font-semibold text-gray-200 mt-4 mb-1">Investment Inputs</h4>
+                            <ul class="list-disc list-inside pl-4 space-y-1">
+                                <li><strong>Initial Portfolio Value (Buyer/Renter):</strong> Starting amount of money each person has in their investment account at Year 0.</li>
+                                <li><strong>Investment Return (%/year):</strong> Average yearly growth rate of the investment portfolios.</li>
+                                <li><strong>Capital Gains Tax (%):</strong> Tax rate applied to the gains of investment portfolios when they are sold at the end. This is not applied to the home sale.</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
