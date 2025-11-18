@@ -63,42 +63,6 @@
                         </div>
                 
                         <div>
-                            <h3 class="text-xl font-semibold text-white mb-2">How the Simulation Works (year-by-year)</h3>
-                            <ul class="list-disc list-inside pl-4 space-y-2">
-                                <li><strong>For the Owner:</strong>
-                                    <ul class="list-disc list-inside pl-6 mt-1 space-y-1">
-                                        <li>The <strong>Home Value</strong> grows every year by the "Home Yearly Appreciation" rate.</li>
-                                        <li>Each year, the Owner's costs (Fixed Expenses, Additional Expenses) are tracked for the expense graph.</li>
-                                    </ul>
-                                </li>
-                                <li><strong>For the Renter:</strong>
-                                    <ul class="list-disc list-inside pl-6 mt-1 space-y-1">
-                                        <li>Each year, the Renter's costs (Rent, Additional Expenses) are tracked for the expense graph.</li>
-                                    </ul>
-                                </li>
-                                <li><strong>For both of them</strong>
-                                    <ul class="list-disc list-inside pl-6 mt-1 space-y-1">
-                                        <li>The <strong>Investment Portfolio</strong> grows by the "Investment Return" rate.</li>
-                                        <li>They add their specified "Yearly Investment" to the portfolio.</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <div class="p-4 bg-blue-900/30 border-l-4 border-blue-500 rounded-r-lg">
-                            <h3 class="text-xl font-semibold text-white mb-2">Logic: One-Time Expenses</h3>
-                            <p class="mb-2">
-                                <strong>Crucial Change:</strong> One-time expenses for the owner—specifically <strong>Initial Buying Costs</strong>, <strong>End of Term (Refinancing) Costs</strong>, and <strong>Final Selling Costs</strong>—are <strong>NOT</strong> deducted from the Owner's Net Worth or Investment Portfolio in this simulation.
-                            </p>
-                            <p class="italic text-blue-200">
-                                It is supposed that when there are no recurring expenses, but only one-time (initial, end of term, sale) costs, those are just handled by the owner with a temporarily less costly lifestyle.
-                            </p>
-                            <p class="mt-2">
-                                These costs are still tracked in the "Total Expenses" graph and the Year-by-Year breakdown to show the true cost of ownership, but they do not negatively impact the final asset value.
-                            </p>
-                        </div>
-                
-                        <div>
                             <h3 class="text-xl font-semibold text-white mb-2">Final Calculation (End of Period)</h3>
                             <p>At the end of the "Analysis Period," the calculator simulates a final liquidation to compare net worth:</p>
                             <ol class="list-decimal list-inside pl-4 mt-2 space-y-1">
@@ -107,6 +71,18 @@
                                 <li>The <strong>Capital Gains Tax</strong> is calculated only on the "growth" (gains) of their portfolios.</li>
                                 <li><strong>Final Net Worth = (Full Home Value) + (Net Portfolio Value)</strong></li>
                             </ol>
+                        </div>
+                        <div class="p-4 bg-blue-900/30 border-l-4 border-blue-500 rounded-r-lg">
+                            <h3 class="text-xl font-semibold text-white mb-2">Logic: One-Time Expenses</h3>
+                            <p class="mb-2">
+                                One-time expenses for the owner—specifically <strong>Initial Buying Costs</strong>, <strong>End of Term (Refinancing) Costs</strong>, and <strong>Final Selling Costs</strong>—are <strong>NOT</strong> deducted from the Owner's Net Worth or Investment Portfolio in this simulation.
+                            </p>
+                            <p class="mt-2">
+                                It is supposed that when there are no recurring expenses, but only one-time (initial, end of term, sale) costs, those are just handled by the owner with a temporarily less costly lifestyle.
+                            </p>
+                            <p class="mt-2">
+                                These costs are still tracked in the "Total Expenses" graph and the new "Cost Summary" panel to show the true cost of ownership, but they do not negatively impact the final asset value.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -295,8 +271,15 @@
         <div class="mt-10 overflow-x-auto">
             <h3 class="text-xl font-semibold text-white mb-4 text-center">Year-by-Year Breakdown</h3>
             <div id="results-table-container">
-                </div>
+                <!-- Table inserted here -->
+            </div>
         </div>
+
+        <!-- New Cost Summary Panel -->
+        <div id="cost-summary-container" class="mt-10">
+            <!-- Cost Summary inserted here -->
+        </div>
+
     </div>
 
     <script>
@@ -430,6 +413,13 @@
             // --- Expense Tracking (Cumulative) ---
             let ownerCumulativeExpenses = initialBuyingExpenses; // Starts with initial costs
             let renterCumulativeExpenses = 0;
+            
+            // --- Separate Breakdown Accumulators (New) ---
+            let totalOwnerFixedCosts = 0;
+            let totalOwnerAdditionalCosts = 0;
+            let totalEndTermCosts = 0;
+            let totalRentPaid = 0;
+            let totalRenterAdditionalCosts = 0;
 
             // --- Breakeven Tracking ---
             let breakevenYear = null;
@@ -479,6 +469,9 @@
                 
                 // Update Cumulative Expenses
                 ownerCumulativeExpenses += totalOwnerCosts;
+                // Update granular totals
+                totalOwnerFixedCosts += yearlyFixed;
+                totalOwnerAdditionalCosts += yearlyAdditionalPurchase;
 
                 const yearlyOwnerInvestment = (year <= fixedTermYears)
                     ? currentInvestmentDuring
@@ -492,6 +485,9 @@
                 
                 // Update Cumulative Expenses
                 renterCumulativeExpenses += renterCost;
+                // Update granular totals
+                totalRentPaid += currentRent;
+                totalRenterAdditionalCosts += currentRentAdditionalYearlyExpensesAbs;
                 
                 const renterCashOut = renterCost + currentYearlyInvestmentRenter;
                 
@@ -516,9 +512,9 @@
                 if (year === fixedTermYears && fixedTermYears > 0) {
                     endTermTransactionCost = (currentHomeValue * endTermPct) + endTermExpensesAbs;
                     
-                    // Logic Update: Do NOT deduct from portfolio. 
                     // Just add to Cumulative Expenses (Sunk Cost tracking).
                     ownerCumulativeExpenses += endTermTransactionCost;
+                    totalEndTermCosts += endTermTransactionCost;
                 }
 
                 
@@ -562,22 +558,7 @@
                     }
                 });
 
-                // If Fixed Term expired, insert a transaction row
-                if (year === fixedTermYears && fixedTermYears > 0 && endTermTransactionCost > 0) {
-                    yearByYearData.push({
-                        year: year,
-                        type: 'EndTermExpense',
-                        owner: {
-                            endTermCost: endTermTransactionCost,
-                            // Logic Update: Net worth doesn't change
-                            netWorth: eoyOwnerNetWorth, 
-                            homeValueAtTermEnd: currentHomeValue
-                        },
-                        renter: {
-                            netWorth: eoyRenterNetWorth
-                        }
-                    });
-                }
+                // REMOVED the EndTermExpense row gap here as requested
 
                 // --- 7. Update tracking variables for NEXT year ---
                 ownerInvestmentPortfolio = eoyOwnerPortfolio; 
@@ -605,12 +586,12 @@
             // 1. Owner Home Sale Transaction
             const sellingCost = finalOwnerHomeValue * sellingCostsPct;
             
-            // Logic Update: Selling cost added to cumulative expenses graph
+            // Selling cost added to cumulative expenses graph
             ownerCumulativeExpenses += sellingCost;
-            // Logic Update: Update final expense history point
+            // Update final expense history point
             ownerExpenseHistory[years] = ownerCumulativeExpenses;
 
-            // Logic Update: Selling cost NOT deducted from Net Worth
+            // Selling cost NOT deducted from Net Worth
             let homeProceeds = finalOwnerHomeValue; 
             
             
@@ -658,6 +639,23 @@
             ownerNetWorthHistory[years] = finalOwnerNetWorth;
             renterNetWorthHistory[years] = finalRenterNetWorth;
             
+            // Prepare summary data for the bottom panel
+            const summaryData = {
+                owner: {
+                    initial: initialBuyingExpenses,
+                    fixed: totalOwnerFixedCosts,
+                    additional: totalOwnerAdditionalCosts,
+                    endTerm: totalEndTermCosts,
+                    selling: sellingCost,
+                    total: ownerCumulativeExpenses
+                },
+                renter: {
+                    rent: totalRentPaid,
+                    additional: totalRenterAdditionalCosts,
+                    total: renterCumulativeExpenses
+                }
+            };
+
             return {
                 owner: finalOwnerNetWorth,
                 renter: finalRenterNetWorth,
@@ -666,7 +664,8 @@
                 ownerExpenseHistory: ownerExpenseHistory,
                 renterExpenseHistory: renterExpenseHistory,
                 yearByYearData: yearByYearData,
-                breakevenYear: breakevenYear
+                breakevenYear: breakevenYear,
+                summaryData: summaryData
             };
         }
         
@@ -680,7 +679,7 @@
         function displayResults(results, years) {
             resultsYears.textContent = years;
             
-            const { owner, renter, ownerHistory, renterHistory, ownerExpenseHistory, renterExpenseHistory, yearByYearData, breakevenYear } = results;
+            const { owner, renter, ownerHistory, renterHistory, ownerExpenseHistory, renterExpenseHistory, yearByYearData, breakevenYear, summaryData } = results;
 
             ownerNetWorthEl.textContent = formatCurrency(owner);
             renterNetWorthEl.textContent = formatCurrency(renter);
@@ -713,7 +712,77 @@
             renderChart(ownerHistory, renterHistory, years);
             renderExpensesChart(ownerExpenseHistory, renterExpenseHistory, years);
             renderTable(yearByYearData, breakevenYear); 
+            renderCostSummary(summaryData);
             resultsSection.classList.remove('hidden');
+        }
+
+        /**
+         * Renders the Cost Summary Panel
+         */
+        function renderCostSummary(data) {
+            const container = document.getElementById('cost-summary-container');
+            
+            container.innerHTML = `
+                <h3 class="text-xl font-semibold text-white mb-4 text-center">Total Sunk Cost Breakdown</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    
+                    <!-- Owner Costs -->
+                    <div class="bg-gray-900/50 border border-cyan-900 rounded-lg p-4">
+                        <h4 class="text-lg font-bold text-cyan-400 border-b border-cyan-800 pb-2 mb-3">OWNER TOTAL EXPENSES</h4>
+                        <div class="space-y-3">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-300">Initial Buying Costs:</span>
+                                <span class="text-white font-medium">${formatCurrency(data.owner.initial)}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-300">Total Fixed Term Exp. (Mortgage etc):</span>
+                                <span class="text-white font-medium">${formatCurrency(data.owner.fixed)}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-300">Total Additional Exp. (Maint/Tax):</span>
+                                <span class="text-white font-medium">${formatCurrency(data.owner.additional)}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-300">End of Term Costs:</span>
+                                <span class="text-white font-medium">${formatCurrency(data.owner.endTerm)}</span>
+                            </div>
+                             <div class="flex justify-between text-sm">
+                                <span class="text-gray-300">Selling Costs:</span>
+                                <span class="text-white font-medium">${formatCurrency(data.owner.selling)}</span>
+                            </div>
+                            <div class="border-t border-cyan-800 pt-2 flex justify-between text-lg font-bold mt-2">
+                                <span class="text-cyan-400">TOTAL OWNER COST:</span>
+                                <span class="text-cyan-400">${formatCurrency(data.owner.total)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Renter Costs -->
+                    <div class="bg-gray-900/50 border border-lime-900 rounded-lg p-4">
+                        <h4 class="text-lg font-bold text-lime-400 border-b border-lime-800 pb-2 mb-3">RENTER TOTAL EXPENSES</h4>
+                        <div class="space-y-3">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-300">Total Rent Paid:</span>
+                                <span class="text-white font-medium">${formatCurrency(data.renter.rent)}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-300">Total Additional Expenses:</span>
+                                <span class="text-white font-medium">${formatCurrency(data.renter.additional)}</span>
+                            </div>
+                            <!-- Spacer to align totals if needed -->
+                            <div class="h-5 hidden md:block"></div>
+                            <div class="h-5 hidden md:block"></div>
+                            <div class="h-5 hidden md:block"></div>
+
+                            <div class="border-t border-lime-800 pt-2 flex justify-between text-lg font-bold mt-2">
+                                <span class="text-lime-400">TOTAL RENTER COST:</span>
+                                <span class="text-lime-400">${formatCurrency(data.renter.total)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-center text-gray-500 text-xs mt-4 italic">Note: These are "sunk costs" (money spent and gone). They do not include principal payments or investments, which are assets.</p>
+            `;
         }
 
         /**
@@ -762,38 +831,12 @@
             data.forEach(yearData => {
                 const year = yearData.year;
                 
-                if (yearData.type === 'EndTermExpense') {
-                    const o = yearData.owner;
-                    const homeValueAtTermEnd = o.homeValueAtTermEnd; 
-                    
-                    const pctExpenseAmount = homeValueAtTermEnd * (endTermPctForTable / 100);
-                    
-                    // Logic Update: Simplified End Term Panel, no net worth deduction shown
-                    tableHTML += `
-                        <tr class="bg-gray-700 border-t-2 border-yellow-500 border-b-2 border-yellow-500">
-                            <td colspan="16" class="py-4 px-3 text-sm text-center">
-                                <span class="font-bold text-xl text-yellow-300 block mb-4">YEAR ${year} END OF FIXED TERM EXPENSE TRANSACTION</span>
-                                <p class="text-gray-300 text-sm mb-4">These expenses are paid by the owner out-of-pocket (lifestyle cost) and are not deducted from the investment portfolio.</p>
-                                
-                                <div class="grid grid-cols-2 gap-4 max-w-3xl mx-auto bg-gray-800 p-4 rounded-lg">
-                                    
-                                    <div class="text-right text-yellow-300 font-medium">Expense Component 1 (% of Price):</div>
-                                    <div class="text-left text-white">${endTermPctForTable.toFixed(1)}% of Home Value (${formatCurrency(homeValueAtTermEnd)}) = <span class="text-red-400 font-bold">${formatCurrency(pctExpenseAmount)}</span></div>
-                                    
-                                    <div class="text-right text-yellow-300 font-medium">Expense Component 2 (Absolute):</div>
-                                    <div class="text-left text-white text-red-400 font-bold">${formatCurrency(endTermExpensesAbsForTable)}</div>
-                                    
-                                    <div class="text-right text-lg font-bold text-white border-t-2 border-yellow-500 pt-3">TOTAL OUT-OF-POCKET COST:</div>
-                                    <div class="text-left text-lg font-bold text-red-400 border-t-2 border-yellow-500 pt-3">${formatCurrency(o.endTermCost)}</div>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                } else if (yearData.type === 'FinalSale') {
+                // Note: EndTermExpense block removed from here as requested.
+                
+                if (yearData.type === 'FinalSale') {
                     const o = yearData.owner;
                     const r = yearData.renter;
                     
-                    // Logic Update: Final Sale, no deduction of selling costs from Home Value for Net Worth
                     tableHTML += `
                         <tr class="bg-gray-700 border-t-4 border-white">
                             <td colspan="16" class="py-4 px-3 text-sm text-center">
@@ -811,8 +854,8 @@
                         </tr>
                         <tr class="bg-gray-700">
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-cyan-300"></td>
-                            <td colspan="8" class="py-4 px-3 text-sm font-semibold text-gray-400 text-right"> SELLING COSTS (Paid Out-of-Pocket/Lifestyle):</td>
-                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-red-400">${formatCurrency(o.sellingCost)}</td>
+                            <td colspan="8" class="py-4 px-3 text-sm font-semibold text-gray-400 text-right"></td>
+                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-red-400"></td>
 
                             <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-lime-300"></td>
                             <td colspan="4" class="py-4 px-3 text-sm font-semibold text-gray-400 text-right"> RENTER PORTFOLIO BASIS:</td>
