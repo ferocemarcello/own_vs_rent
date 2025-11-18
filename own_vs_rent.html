@@ -42,6 +42,101 @@
             </div>
         </div>
 
+        <div class="max-w-4xl mx-auto mb-8">
+            <div class="bg-gray-800 rounded-xl shadow-lg">
+                <button id="toggle-help-btn" class="w-full flex justify-between items-center p-6 text-left text-xl font-semibold text-white focus:outline-none transition-colors duration-200 hover:bg-gray-700 rounded-t-xl">
+                    <span>🤔 How This Works (Click to Expand)</span>
+                    <svg id="help-chevron" class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                
+                <div id="help-content" class="hidden p-6 border-t border-gray-700">
+                    <div class="text-gray-300 space-y-6">
+                        <div>
+                            <h3 class="text-xl font-semibold text-white mb-2">The Core Logic</h3>
+                            <p>This calculator simulates the financial outcome of buying a home versus renting over a set period. It compares the final net worth of an <strong>Owner</strong> against a <strong>Renter</strong> by tracking two main assets for each:</p>
+                            <ol class="list-decimal list-inside pl-4 mt-2 space-y-1">
+                                <li><strong>Property Equity (Owner only):</strong> The value of the home, which appreciates over time.</li>
+                                <li><strong>Investment Portfolio:</strong> A separate investment account (like stocks or bonds) that both the Owner and Renter contribute to and which grows at a specified rate.</li>
+                            </ol>
+                        </div>
+                
+                        <div>
+                            <h3 class="text-xl font-semibold text-white mb-2">How the Simulation Works (Year-by-Year)</h3>
+                            <ul class="list-disc list-inside pl-4 space-y-2">
+                                <li><strong>For the Owner:</strong>
+                                    <ul class="list-disc list-inside pl-6 mt-1 space-y-1">
+                                        <li>The <strong>Home Value</strong> grows by the "Home Yearly Appreciation" rate.</li>
+                                        <li>The <strong>Investment Portfolio</strong> grows by the "Investment Return" rate.</li>
+                                        <li>Each year, the Owner adds their specified "Yearly Investment" to the portfolio.</li>
+                                        <li>Each year, the Owner's costs (Fixed Expenses, Other Expenses) are tracked.</li>
+                                    </ul>
+                                </li>
+                                <li><strong>For the Renter:</strong>
+                                    <ul class="list-disc list-inside pl-6 mt-1 space-y-1">
+                                        <li>The <strong>Investment Portfolio</strong> grows by the "Investment Return" rate.</li>
+                                        <li>Each year, the Renter adds their specified "Yearly Investment" to the portfolio.</li>
+                                        <li>Each year, the Renter's costs (Rent, Additional Expenses) are tracked.</li>
+                                    </ul>
+                                </li>
+                                <li class="font-semibold"><strong>The "Renter's Savings" (Crucial Assumption):</strong> The calculator finds the difference between the Owner's total yearly costs and the Renter's total yearly costs. This "saving" is <strong>automatically added to the Renter's investment portfolio</strong> each year. This assumes the Renter diligently invests any money saved by not owning.</li>
+                            </ul>
+                        </div>
+                
+                        <div>
+                            <h3 class="text-xl font-semibold text-white mb-2">Final Calculation (End of Period)</h3>
+                            <p>At the end of the "Analysis Period," the calculator simulates a final liquidation to compare net worth:</p>
+                            <ol class="list-decimal list-inside pl-4 mt-2 space-y-1">
+                                <li>The <strong>Owner</strong> "sells" the house, paying "Selling Costs." The final home equity is added to their net worth.</li>
+                                <li>Both the <strong>Owner</strong> and <strong>Renter</strong> "liquidate" their investment portfolios.</li>
+                                <li>The <strong>Capital Gains Tax</strong> is calculated *only* on the *growth* (gains) of their portfolios (not the total value). The remaining amount is their net portfolio value.</li>
+                                <li><strong>Final Net Worth = (Net Home Proceeds [Owner only]) + (Net Portfolio Proceeds)</strong></li>
+                            </ol>
+                        </div>
+                
+                        <div>
+                            <h3 class="text-xl font-semibold text-white mb-2">Key Input Fields Explained</h3>
+                            
+                            <h4 class="text-lg font-semibold text-gray-200 mt-4 mb-1">General</h4>
+                            <ul class="list-disc list-inside pl-4 space-y-1">
+                                <li><strong>Analysis Period (Years):</strong> How many years to run the simulation for.</li>
+                                <li><strong>Yearly Inflation (%):</strong> Affects "Additional Yearly Expenses" for both Owner and Renter, increasing them each year.</li>
+                            </ul>
+                
+                            <h4 class="text-lg font-semibold text-gray-200 mt-4 mb-1">Purchase Inputs (Owner)</h4>
+                            <ul class="list-disc list-inside pl-4 space-y-1">
+                                <li><strong>Home Initial Price:</strong> The purchase price of the home.</li>
+                                <li><strong>Initial Costs (% and Absolute):</strong> One-time fees for buying. <em>Note: In the current version of the calculator, these fields are calculated but not deducted from the owner's portfolio or used in the final net worth calculation.</em></li>
+                                <li><strong>Yearly Expenses with Fixed Term (Absolute):</strong> A large, fixed annual cost, typically a mortgage (principal + interest).</li>
+                                <li><strong>Years for Fixed Term Expenses:</strong> The duration of the fixed expense (e.g., 10-year mortgage term).</li>
+                                <li><strong>Yearly Investment during fixed term:</strong> Annual amount the Owner invests *while* paying the fixed expense.</li>
+                                <li><strong>Additional Yearly Expenses (Absolute / %):</strong> Ongoing costs of ownership (property tax, maintenance, insurance). The 'Absolute' part increases with inflation.</li>
+                                <li><strong>Home Yearly Appreciation (%):</strong> Annual increase in the home's value.</li>
+                                <li><strong>Expenses at End of Term (% / Absolute):</strong> A one-time fee paid from the Owner's portfolio when the "Fixed Term" ends (e.g., refinancing fee).</li>
+                                <li><strong>Selling Costs (% of Final Price):</strong> Costs paid when the house is sold at the end of the analysis period.</li>
+                                <li><strong>Yearly Investment after fixed term:</strong> Annual amount the Owner invests *after* the fixed expense (mortgage) is paid off.</li>
+                            </ul>
+                
+                            <h4 class="text-lg font-semibold text-gray-200 mt-4 mb-1">Rental Inputs (Renter)</h4>
+                            <ul class="list-disc list-inside pl-4 space-y-1">
+                                <li><strong>Yearly Rent (Absolute):</strong> The starting annual rent.</li>
+                                <li><strong>Rent Increase (%/year):</strong> How much the rent increases each year.</li>
+                                <li><strong>Additional Yearly Expenses (Absolute):</strong> Other rental costs (e.g., renter's insurance), which increase with inflation.</li>
+                                <li><strong>Yearly Investment:</strong> The base amount the Renter invests each year (in addition to any "savings").</li>
+                            </ul>
+                
+                            <h4 class="text-lg font-semibold text-gray-200 mt-4 mb-1">Investment Inputs</h4>
+                            <ul class="list-disc list-inside pl-4 space-y-1">
+                                <li><strong>Initial Portfolio Value (Buyer/Renter):</strong> The starting amount of money each person has in their investment account at Year 0.</li>
+                                <li><strong>Investment Return (%/year):</strong> The average annual growth rate of the investment portfolios.</li>
+                                <li><strong>Capital Gains Tax (%):</strong> The tax rate applied *only* to the gains (profit) in the investment portfolios when they are sold at the end. This is *not* applied to the home sale.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div>
             <div id="international-version">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -61,6 +156,7 @@
                         
                         <div>
                             <label for="int-initial-costs-abs" class="block text-sm font-medium text-gray-300">Initial Costs (Absolute)</label>
+
                             <input type="number" id="int-initial-costs-abs" value="2000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
@@ -100,12 +196,12 @@
                         </div>
                         
                         <div>
-                            <label for="int-end-term-pct" class="block text-sm font-medium text-gray-300">Expenses at End of Term (% of Price)</label>
+                            <label for="int-end-term-pct" class="block text-sm font-medium text-gray-300">Expenses at End of Term (% of Price)</Gabel>
                             <input type="number" id="int-end-term-pct" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
-                            <label for="int-end-term-abs" class="block text-sm font-medium text-gray-300">Expenses at End of Term (Absolute)</label>
+                            <label for="int-end-term-abs" class="block text-sm font-medium text-gray-300">Expenses at End of Term (Absolute)</Gabel>
                             <input type="number" id="int-end-term-abs" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
                         
@@ -124,7 +220,7 @@
                         <h2 class="text-2xl font-semibold text-white border-b border-gray-700 pb-3">Rental Inputs</h2>
                         
                         <div>
-                            <label for="int-yearly-rent" class="block text-sm font-medium text-gray-300">Yearly Rent (Absolute)</Tabel>
+                            <label for="int-yearly-rent" class="block text-sm font-medium text-gray-300">Yearly Rent (Absolute)</label>
                             <input type="number" id="int-yearly-rent" value="7795" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
@@ -225,9 +321,22 @@
         const winnerEl = document.getElementById('winner');
         const netBenefitEl = document.getElementById('net-benefit');
 
+        // --- NEW: Help Panel References ---
+        const toggleHelpBtn = document.getElementById('toggle-help-btn');
+        const helpContent = document.getElementById('help-content');
+        const helpChevron = document.getElementById('help-chevron');
+        // --- END: Help Panel References ---
+
         let myChart; // To hold the chart instance
 
         // --- Event Listeners ---
+
+        // --- NEW: Help Panel Listener ---
+        toggleHelpBtn.addEventListener('click', () => {
+            helpContent.classList.toggle('hidden');
+            helpChevron.classList.toggle('rotate-180'); // Rotates the chevron icon
+        });
+        // --- END: Help Panel Listener ---
 
         // Calculate Button Logic
         calculateBtn.addEventListener('click', () => {
@@ -695,7 +804,7 @@
                             <td colspan="7" class="py-4 px-3 text-sm font-semibold text-gray-400"></td>
                         </tr>
                         <tr class="bg-gray-700 border-b-2 border-green-500">
-                            <td class="whitespace-nowrap py-4 px-3 text-sm font-bold text-green-300"></td>
+                            <td class="whitespace-nowwraph py-4 px-3 text-sm font-bold text-green-300"></td>
                             <td colspan="7" class="py-2 px-3 text-sm font-semibold text-white">
                                 <div class="p-2 bg-gray-800 rounded-lg border border-cyan-500/50">
                                     <p class="font-bold text-cyan-300 mb-1">OWNER PORTFOLIO LIQUIDATION (${capGainsTaxForTable}% CGT)</p>
