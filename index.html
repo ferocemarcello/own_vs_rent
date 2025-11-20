@@ -44,11 +44,11 @@
         <div class="bg-gray-800 p-6 rounded-xl shadow-lg mb-8 max-w-2xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
                 <label for="analysis-period" class="block text-lg font-semibold text-white">Analysis Period (Years)</label>
-                <input type="number" id="analysis-period" value="30" class="w-full mt-2 bg-gray-700 border border-gray-600 rounded-md p-3 focus:ring-blue-500 focus:border-blue-500">
+                <input type="number" id="analysis-period" value="0" class="w-full mt-2 bg-gray-700 border border-gray-600 rounded-md p-3 focus:ring-blue-500 focus:border-blue-500">
             </div>
             <div>
                 <label for="inflation" class="block text-lg font-semibold text-white">Yearly Inflation (%)</label>
-                <input type="number" id="inflation" value="3.0" class="w-full mt-2 bg-gray-700 border border-gray-600 rounded-md p-3 focus:ring-blue-500 focus:border-blue-500">
+                <input type="number" id="inflation" value="0" class="w-full mt-2 bg-gray-700 border border-gray-600 rounded-md p-3 focus:ring-blue-500 focus:border-blue-500">
             </div>
         </div>
 
@@ -145,73 +145,73 @@
                         
                         <div>
                             <label for="int-home-price" class="block text-sm font-medium text-gray-300">Home Initial Price</label>
-                            <input type="number" id="int-home-price" value="300000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <input type="number" id="int-home-price" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
                             <label for="int-initial-costs-pct" class="block text-sm font-medium text-gray-300">Initial Costs (% of Home Price)</label>
-                            <input type="number" id="int-initial-costs-pct" value="2.5" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <input type="number" id="int-initial-costs-pct" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
                         
                         <div>
                             <label for="int-initial-costs-abs" class="block text-sm font-medium text-gray-300">Initial Costs (Absolute)</label>
 
-                            <input type="number" id="int-initial-costs-abs" value="2000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <input type="number" id="int-initial-costs-abs" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
                             <label for="int-fixed-term-abs" class="block text-sm font-medium text-gray-300">Yearly Expenses with Fixed Term (Absolute)(e.g. mortgage)</label>
-                            <input type="number" id="int-fixed-term-abs" value="15000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <input type="number" id="int-fixed-term-abs" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
                             <label for="int-fixed-term-years" class="block text-sm font-medium text-gray-300">Years for Fixed Term Expenses(e.g. mortgage duration)</label>
-                            <input type="number" id="int-fixed-term-years" value="20" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <input type="number" id="int-fixed-term-years" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
                         
                         <div>
                             <label for="int-purchase-yearly-investment" class="block text-sm font-medium text-gray-300">Yearly Investment during fixed term</label>
-                            <input type="number" id="int-purchase-yearly-investment" value="10000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <input type="number" id="int-purchase-yearly-investment" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
                             <label for="int-purchase-yearly-investment-increase" class="block text-sm font-medium text-gray-300">Yearly Investment Increase (%/year)</label>
-                            <input type="number" id="int-purchase-yearly-investment-increase" value="2" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <input type="number" id="int-purchase-yearly-investment-increase" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
                             <label for="int-additional-yearly-expenses-buyer" class="block text-sm font-medium text-gray-300">Additional Yearly Expenses (Absolute)</label>
-                            <input type="number" id="int-additional-yearly-expenses-buyer" value="5000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <input type="number" id="int-additional-yearly-expenses-buyer" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
                             <label for="int-additional-yearly-pct-purchase" class="block text-sm font-medium text-gray-300">Additional Yearly Expenses (% of Home Value)</label>
-                            <input type="number" id="int-additional-yearly-pct-purchase" value="1" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <input type="number" id="int-additional-yearly-pct-purchase" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
                             <label for="int-home-appreciation" class="block text-sm font-medium text-gray-300">Home Yearly Appreciation (%)</label>
-                            <input type="number" id="int-home-appreciation" value="4.0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <input type="number" id="int-home-appreciation" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
                         
                         <div>
                             <label for="int-end-term-pct" class="block text-sm font-medium text-gray-300">Expenses at End of Term (% of Price)</label>
-                            <input type="number" id="int-end-term-pct" value="2" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <input type="number" id="int-end-term-pct" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
                             <label for="int-end-term-expenses-abs" class="block text-sm font-medium text-gray-300">Expenses at End of Term (Absolute)</label>
-                            <input type="number" id="int-end-term-expenses-abs" value="2000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <input type="number" id="int-end-term-expenses-abs" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
                         
                         <div>
                             <label for="int-selling-costs-pct" class="block text-sm font-medium text-gray-300">Selling Costs (% of Final Price)</label>
-                            <input type="number" id="int-selling-costs-pct" value="2.0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <input type="number" id="int-selling-costs-pct" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
                         
                         <div>
                             <label for="int-purchase-yearly-investment-after" class="block text-sm font-medium text-gray-300">Yearly Investment after fixed term</label>
-                            <input type="number" id="int-purchase-yearly-investment-after" value="30000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <input type="number" id="int-purchase-yearly-investment-after" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
                     </div>
 
@@ -220,27 +220,27 @@
                         
                         <div>
                             <label for="int-yearly-rent" class="block text-sm font-medium text-gray-300">Yearly Rent (Absolute)</label>
-                            <input type="number" id="int-yearly-rent" value="10000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <input type="number" id="int-yearly-rent" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
                             <label for="int-rent-increase" class="block text-sm font-medium text-gray-300">Rent Increase (%/year)</label>
-                            <input type="number" id="int-rent-increase" value="3.0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <input type="number" id="int-rent-increase" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
                             <label for="int-rent-additional-yearly-expenses-abs" class="block text-sm font-medium text-gray-300">Additional Yearly Expenses (Absolute)</label>
-                            <input type="number" id="int-rent-additional-yearly-expenses-abs" value="1500" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <input type="number" id="int-rent-additional-yearly-expenses-abs" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
                             <label for="int-rental-yearly-investment" class="block text-sm font-medium text-gray-300">Yearly Investment</label>
-                            <input type="number" id="int-rental-yearly-investment" value="20000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <input type="number" id="int-rental-yearly-investment" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
                             <label for="int-rental-yearly-investment-increase" class="block text-sm font-medium text-gray-300">Yearly Investment Increase (%/year)</label>
-                            <input type="number" id="int-rental-yearly-investment-increase" value="2" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <input type="number" id="int-rental-yearly-investment-increase" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
                     </div>
 
@@ -254,17 +254,17 @@
 
                         <div>
                             <label for="int-initial-portfolio-value-renter" class="block text-sm font-medium text-gray-300">Initial Portfolio Value (for Renter)</label>
-                            <input type="number" id="int-initial-portfolio-value-renter" value="50000" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <input type="number" id="int-initial-portfolio-value-renter" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
                         
                         <div>
                             <label for="int-investment-return" class="block text-sm font-medium text-gray-300">Investment Return (%/year)</label>
-                            <input type="number" id="int-investment-return" value="10" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <input type="number" id="int-investment-return" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
 
                         <div>
                             <label for="int-cap-gains-tax" class="block text-sm font-medium text-gray-300">Capital Gains Tax (%)</label>
-                            <input type="number" id="int-cap-gains-tax" value="25.0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
+                            <input type="number" id="int-cap-gains-tax" value="0" class="mt-1 w-full bg-gray-700 border-gray-600 rounded-md p-2">
                         </div>
                     </div>
 
