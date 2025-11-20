@@ -50,6 +50,11 @@
                 <label for="inflation" class="block text-lg font-semibold text-white">Yearly Inflation (%)</label>
                 <input type="number" id="inflation" value="0" class="w-full mt-2 bg-gray-700 border border-gray-600 rounded-md p-3 focus:ring-blue-500 focus:border-blue-500">
             </div>
+            <div class="md:col-span-2 flex justify-center space-x-4">
+                <button id="btn-20" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-sm transition duration-300 shadow-lg">20 Year Old</button>
+                <button id="btn-30" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-sm transition duration-300 shadow-lg">30 Year Old</button>
+                <button id="btn-40" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-sm transition duration-300 shadow-lg">40 Year Old</button>
+            </div>
         </div>
 
         <div class="max-w-4xl mx-auto mb-8">
@@ -371,6 +376,94 @@
             }
         });
 
+        document.getElementById('btn-20').addEventListener('click', () => set20YearOldData());
+        document.getElementById('btn-30').addEventListener('click', () => set30YearOldData());
+        document.getElementById('btn-40').addEventListener('click', () => set40YearOldData());
+
+        function set20YearOldData() {
+            document.getElementById('int-home-price').value = 420000;
+            document.getElementById('int-initial-costs-pct').value = 2.5;
+            document.getElementById('int-initial-costs-abs').value = 2000;
+            document.getElementById('int-fixed-term-abs').value = 17800; // Adjusted from income
+            document.getElementById('int-fixed-term-years').value = 25;
+            document.getElementById('int-purchase-yearly-investment').value = 1000;
+            document.getElementById('int-purchase-yearly-investment-increase').value = 2;
+            document.getElementById('int-additional-yearly-expenses-buyer').value = 5000;
+            document.getElementById('int-additional-yearly-pct-purchase').value = 1;
+            document.getElementById('int-home-appreciation').value = 4;
+            document.getElementById('int-end-term-pct').value = 2;
+            document.getElementById('int-end-term-expenses-abs').value = 2000;
+            document.getElementById('int-selling-costs-pct').value = 2;
+            document.getElementById('int-purchase-yearly-investment-after').value = 30000;
+            document.getElementById('int-yearly-rent').value = 14000;
+            document.getElementById('int-rent-increase').value = 3;
+            document.getElementById('int-rent-additional-yearly-expenses-abs').value = 1500;
+            document.getElementById('int-rental-yearly-investment').value = 1000;
+            document.getElementById('int-rental-yearly-investment-increase').value = 2;
+            document.getElementById('int-initial-portfolio-value-buyer').value = 5600;
+            document.getElementById('int-initial-portfolio-value-renter').value = 5600;
+            document.getElementById('int-investment-return').value = 8.6;
+            document.getElementById('int-cap-gains-tax').value = 25;
+            document.getElementById('analysis-period').value = 30; // Default for analysis
+            document.getElementById('inflation').value = 3; // Default for analysis
+        }
+
+        function set30YearOldData() {
+            document.getElementById('int-home-price').value = 420000;
+            document.getElementById('int-initial-costs-pct').value = 2.5;
+            document.getElementById('int-initial-costs-abs').value = 2000;
+            document.getElementById('int-fixed-term-abs').value = 22000; // Adjusted from income
+            document.getElementById('int-fixed-term-years').value = 25;
+            document.getElementById('int-purchase-yearly-investment').value = 3000;
+            document.getElementById('int-purchase-yearly-investment-increase').value = 2;
+            document.getElementById('int-additional-yearly-expenses-buyer').value = 5000;
+            document.getElementById('int-additional-yearly-pct-purchase').value = 1;
+            document.getElementById('int-home-appreciation').value = 4;
+            document.getElementById('int-end-term-pct').value = 2;
+            document.getElementById('int-end-term-expenses-abs').value = 2000;
+            document.getElementById('int-selling-costs-pct').value = 2;
+            document.getElementById('int-purchase-yearly-investment-after').value = 30000;
+            document.getElementById('int-yearly-rent').value = 14000;
+            document.getElementById('int-rent-increase').value = 3;
+            document.getElementById('int-rent-additional-yearly-expenses-abs').value = 1500;
+            document.getElementById('int-rental-yearly-investment').value = 3000;
+            document.getElementById('int-rental-yearly-investment-increase').value = 2;
+            document.getElementById('int-initial-portfolio-value-buyer').value = 20000;
+            document.getElementById('int-initial-portfolio-value-renter').value = 20000;
+            document.getElementById('int-investment-return').value = 7.9;
+            document.getElementById('int-cap-gains-tax').value = 25;
+            document.getElementById('analysis-period').value = 30;
+            document.getElementById('inflation').value = 3;
+        }
+
+        function set40YearOldData() {
+            document.getElementById('int-home-price').value = 420000;
+            document.getElementById('int-initial-costs-pct').value = 2.5;
+            document.getElementById('int-initial-costs-abs').value = 2000;
+            document.getElementById('int-fixed-term-abs').value = 25000; // Adjusted from income
+            document.getElementById('int-fixed-term-years').value = 25;
+            document.getElementById('int-purchase-yearly-investment').value = 5000;
+            document.getElementById('int-purchase-yearly-investment-increase').value = 2;
+            document.getElementById('int-additional-yearly-expenses-buyer').value = 5000;
+            document.getElementById('int-additional-yearly-pct-purchase').value = 1;
+            document.getElementById('int-home-appreciation').value = 4;
+            document.getElementById('int-end-term-pct').value = 2;
+            document.getElementById('int-end-term-expenses-abs').value = 2000;
+            document.getElementById('int-selling-costs-pct').value = 2;
+            document.getElementById('int-purchase-yearly-investment-after').value = 30000;
+            document.getElementById('int-yearly-rent').value = 14000;
+            document.getElementById('int-rent-increase').value = 3;
+            document.getElementById('int-rent-additional-yearly-expenses-abs').value = 1500;
+            document.getElementById('int-rental-yearly-investment').value = 5000;
+            document.getElementById('int-rental-yearly-investment-increase').value = 2;
+            document.getElementById('int-initial-portfolio-value-buyer').value = 50000;
+            document.getElementById('int-initial-portfolio-value-renter').value = 50000;
+            document.getElementById('int-investment-return').value = 7.2;
+            document.getElementById('int-cap-gains-tax').value = 25;
+            document.getElementById('analysis-period').value = 30;
+            document.getElementById('inflation').value = 3;
+        }
+
         // --- Helper Functions ---
 
         /**
@@ -386,6 +479,7 @@
             }
             return parseFloat(el.value) || 0;
         }
+
 
         /**
          * Formats a number as currency (using generic style for int'l)
